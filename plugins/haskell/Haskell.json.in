@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"Haskell\",
+    \"Version\" : \"$$QTCREATOR_VERSION\",
+    \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
+    \"Vendor\" : \"Eike Ziller\",
+    \"Copyright\" : \"(C) Eike Ziller\",
+    \"License\" : \"MIT\",
+    \"Description\" : \"Haskell support\",
+    \"Url\" : \"https://haskell.org\",
+    $$dependencyList
+}
