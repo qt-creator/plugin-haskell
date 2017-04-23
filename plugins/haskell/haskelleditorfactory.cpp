@@ -26,6 +26,7 @@
 #include "haskelleditorfactory.h"
 
 #include <texteditor/textdocument.h>
+#include <texteditor/texteditoractionhandler.h>
 
 #include <QCoreApplication>
 
@@ -39,8 +40,10 @@ HaskellEditorFactory::HaskellEditorFactory()
     setId(C_HASKELLEDITOR_ID);
     setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
     addMimeType("text/x-haskell");
+    setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection);
 
     setDocumentCreator([] { return new TextEditor::TextDocument(C_HASKELLEDITOR_ID); });
+    setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
     setParenthesesMatchingEnabled(true);
     setMarksVisible(true);
 }
