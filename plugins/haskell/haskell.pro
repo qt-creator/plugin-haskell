@@ -2,11 +2,13 @@ DEFINES += HASKELL_LIBRARY
 
 # Haskell files
 
-SOURCES += haskellplugin.cpp
+SOURCES += haskellplugin.cpp \
+    haskelleditorfactory.cpp
 
 HEADERS += haskellplugin.h \
         haskell_global.h \
-        haskellconstants.h
+        haskellconstants.h \
+    haskelleditorfactory.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>
@@ -25,7 +27,8 @@ QTC_LIB_DEPENDS += \
     # nothing here at this time
 
 QTC_PLUGIN_DEPENDS += \
-    coreplugin
+    coreplugin \
+    texteditor
 
 QTC_PLUGIN_RECOMMENDS += \
     # optional plugin dependencies. nothing here at this time

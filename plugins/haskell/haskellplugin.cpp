@@ -25,6 +25,7 @@
 
 #include "haskellplugin.h"
 #include "haskellconstants.h"
+#include "haskelleditorfactory.h"
 
 namespace Haskell {
 namespace Internal {
@@ -51,6 +52,8 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
 
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
+
+    addAutoReleasedObject(new HaskellEditorFactory);
 
     return true;
 }
