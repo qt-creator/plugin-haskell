@@ -28,5 +28,8 @@
 namespace Haskell {
 namespace Constants {
 
+const char C_HASKELLEDITOR_ID[] = "Haskell.HaskellEditor";
+const char C_HASKELLSNIPPETSGROUP_ID[] = "Haskell";
+
 } // namespace Haskell
 } // namespace Constants

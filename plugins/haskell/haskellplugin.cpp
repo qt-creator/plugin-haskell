@@ -27,6 +27,8 @@
 #include "haskellconstants.h"
 #include "haskelleditorfactory.h"
 
+#include <texteditor/snippets/snippetprovider.h>
+
 namespace Haskell {
 namespace Internal {
 
@@ -54,6 +56,9 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
     Q_UNUSED(errorString)
 
     addAutoReleasedObject(new HaskellEditorFactory);
+
+    TextEditor::SnippetProvider::registerGroup(Constants::C_HASKELLSNIPPETSGROUP_ID,
+                                               tr("Haskell", "SnippetProvider"));
 
     return true;
 }

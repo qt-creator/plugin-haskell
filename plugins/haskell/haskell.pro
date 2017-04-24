@@ -2,13 +2,17 @@ DEFINES += HASKELL_LIBRARY
 
 # Haskell files
 
-SOURCES += haskellplugin.cpp \
-    haskelleditorfactory.cpp
+SOURCES += \
+    haskellcompletionassist.cpp \
+    haskelleditorfactory.cpp \
+    haskellplugin.cpp
 
-HEADERS += haskellplugin.h \
-        haskell_global.h \
-        haskellconstants.h \
-    haskelleditorfactory.h
+HEADERS += \
+    haskell_global.h \
+    haskellcompletionassist.h \
+    haskellconstants.h \
+    haskelleditorfactory.h \
+    haskellplugin.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>

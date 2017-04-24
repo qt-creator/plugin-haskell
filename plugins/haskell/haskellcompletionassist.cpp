@@ -23,31 +23,22 @@
 **
 ****************************************************************************/
 
-#include "haskelleditorfactory.h"
-
 #include "haskellcompletionassist.h"
+
 #include "haskellconstants.h"
 
-#include <texteditor/textdocument.h>
-#include <texteditor/texteditoractionhandler.h>
-
-#include <QCoreApplication>
+#include <coreplugin/id.h>
+#include <texteditor/codeassist/keywordscompletionassist.h>
 
 namespace Haskell {
 namespace Internal {
 
-HaskellEditorFactory::HaskellEditorFactory()
+TextEditor::IAssistProcessor *HaskellCompletionAssistProvider::createProcessor() const
 {
-    setId(Constants::C_HASKELLEDITOR_ID);
-    setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
-    addMimeType("text/x-haskell");
-    setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection);
-    setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
-    setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
-    setParenthesesMatchingEnabled(true);
-    setMarksVisible(true);
-    setCompletionAssistProvider(new HaskellCompletionAssistProvider);
+    auto processor = new TextEditor::KeywordsCompletionAssistProcessor(TextEditor::Keywords());
+    processor->setSnippetGroup(Constants::C_HASKELLSNIPPETSGROUP_ID);
+    return processor;
 }
 
-} // Internal
-} // Haskell
+} // namespace Internal
+} // namespace Haskell
