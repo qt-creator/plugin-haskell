@@ -25,69 +25,31 @@
 
 #pragma once
 
-#include <QChar>
-#include <QString>
-#include <QVector>
+#include "ghcmod.h"
 
-#include <memory>
+#include <texteditor/basehoverhandler.h>
+#include <utils/fileutils.h>
+#include <utils/optional.h>
 
 namespace Haskell {
 namespace Internal {
 
-enum class TokenType {
-    Variable,
-    Constructor,
-    Operator,
-    OperatorConstructor,
-    Whitespace,
-    String,
-    StringError,
-    Char,
-    CharError,
-    EscapeSequence,
-    Integer,
-    Float,
-    Keyword,
-    Special,
-    SingleLineComment,
-    MultiLineComment,
-    Unknown
-};
-
-class Token {
-public:
-    bool isValid() const;
-
-    TokenType type = TokenType::Unknown;
-    int startCol = -1;
-    int length = -1;
-    QStringRef text;
-
-    std::shared_ptr<QString> source; // keep the string ref alive
-};
-
-class Tokens : public QVector<Token>
+class HaskellHoverHandler : public TextEditor::BaseHoverHandler
 {
-public:
-    enum class State {
-        None = -1,
-        StringGap = 0, // gap == two backslashes enclosing only whitespace
-        MultiLineCommentGuard // nothing may follow that
-    };
+private:
+    void identifyMatch(TextEditor::TextEditorWidget *editorWidget, int pos) override;
+    void operateTooltip(TextEditor::TextEditorWidget *editorWidget, const QPoint &point) override;
 
-    Tokens(std::shared_ptr<QString> source);
+    void cancel();
 
-    Token tokenAtColumn(int col) const;
+    Utils::FileName m_filePath;
+    int m_line = -1;
+    int m_col = -1;
+    QString m_name;
 
-    std::shared_ptr<QString> source;
-    int state = int(State::None);
+    QFuture<Utils::optional<SymbolInfo>> m_symbolFuture;
+    QFuture<Utils::optional<QString>> m_typeFuture;
 };
 
-class HaskellTokenizer
-{
-public:
-    static Tokens tokenize(const QString &line, int startState);
-};
-
-} // Internal
-} // Haskell
+} // namespace Internal
+} // namespace Haskell

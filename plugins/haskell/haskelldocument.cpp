@@ -23,71 +23,29 @@
 **
 ****************************************************************************/
 
-#pragma once
+#include "haskelldocument.h"
 
-#include <QChar>
-#include <QString>
-#include <QVector>
+#include "haskellconstants.h"
+#include "haskellmanager.h"
 
-#include <memory>
+using namespace TextEditor;
+using namespace Utils;
 
 namespace Haskell {
 namespace Internal {
 
-enum class TokenType {
-    Variable,
-    Constructor,
-    Operator,
-    OperatorConstructor,
-    Whitespace,
-    String,
-    StringError,
-    Char,
-    CharError,
-    EscapeSequence,
-    Integer,
-    Float,
-    Keyword,
-    Special,
-    SingleLineComment,
-    MultiLineComment,
-    Unknown
-};
-
-class Token {
-public:
-    bool isValid() const;
-
-    TokenType type = TokenType::Unknown;
-    int startCol = -1;
-    int length = -1;
-    QStringRef text;
-
-    std::shared_ptr<QString> source; // keep the string ref alive
-};
-
-class Tokens : public QVector<Token>
+HaskellDocument::HaskellDocument()
+    : TextDocument(Constants::C_HASKELLEDITOR_ID)
 {
-public:
-    enum class State {
-        None = -1,
-        StringGap = 0, // gap == two backslashes enclosing only whitespace
-        MultiLineCommentGuard // nothing may follow that
-    };
+    connect(this, &IDocument::filePathChanged, this, [this](const FileName &, const FileName &fn) {
+        m_ghcmod = HaskellManager::ghcModForFile(fn);
+    });
+}
 
-    Tokens(std::shared_ptr<QString> source);
-
-    Token tokenAtColumn(int col) const;
-
-    std::shared_ptr<QString> source;
-    int state = int(State::None);
-};
-
-class HaskellTokenizer
+std::shared_ptr<AsyncGhcMod> HaskellDocument::ghcMod() const
 {
-public:
-    static Tokens tokenize(const QString &line, int startState);
-};
+    return m_ghcmod;
+}
 
-} // Internal
-} // Haskell
+} // namespace Internal
+} // namespace Haskell

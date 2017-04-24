@@ -27,7 +27,9 @@
 
 #include "haskellcompletionassist.h"
 #include "haskellconstants.h"
+#include "haskelldocument.h"
 #include "haskellhighlighter.h"
+#include "haskellhoverhandler.h"
 
 #include <texteditor/textdocument.h>
 #include <texteditor/texteditoractionhandler.h>
@@ -43,7 +45,8 @@ HaskellEditorFactory::HaskellEditorFactory()
     setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
     addMimeType("text/x-haskell");
     setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection);
-    setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
+    addHoverHandler(new HaskellHoverHandler);
+    setDocumentCreator([] { return new HaskellDocument(); });
     setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
     setParenthesesMatchingEnabled(true);
     setMarksVisible(true);

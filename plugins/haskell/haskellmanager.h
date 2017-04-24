@@ -25,69 +25,19 @@
 
 #pragma once
 
-#include <QChar>
-#include <QString>
-#include <QVector>
-
-#include <memory>
+#include <utils/fileutils.h>
 
 namespace Haskell {
 namespace Internal {
 
-enum class TokenType {
-    Variable,
-    Constructor,
-    Operator,
-    OperatorConstructor,
-    Whitespace,
-    String,
-    StringError,
-    Char,
-    CharError,
-    EscapeSequence,
-    Integer,
-    Float,
-    Keyword,
-    Special,
-    SingleLineComment,
-    MultiLineComment,
-    Unknown
-};
+class AsyncGhcMod;
 
-class Token {
-public:
-    bool isValid() const;
-
-    TokenType type = TokenType::Unknown;
-    int startCol = -1;
-    int length = -1;
-    QStringRef text;
-
-    std::shared_ptr<QString> source; // keep the string ref alive
-};
-
-class Tokens : public QVector<Token>
+class HaskellManager
 {
 public:
-    enum class State {
-        None = -1,
-        StringGap = 0, // gap == two backslashes enclosing only whitespace
-        MultiLineCommentGuard // nothing may follow that
-    };
-
-    Tokens(std::shared_ptr<QString> source);
-
-    Token tokenAtColumn(int col) const;
-
-    std::shared_ptr<QString> source;
-    int state = int(State::None);
+    static Utils::FileName findProjectDirectory(const Utils::FileName &filePath);
+    static std::shared_ptr<AsyncGhcMod> ghcModForFile(const Utils::FileName &filePath);
 };
 
-class HaskellTokenizer
-{
-public:
-    static Tokens tokenize(const QString &line, int startState);
-};
-
-} // Internal
-} // Haskell
+} // namespace Internal
+} // namespace Haskell

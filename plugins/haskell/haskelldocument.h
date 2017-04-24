@@ -25,69 +25,27 @@
 
 #pragma once
 
-#include <QChar>
-#include <QString>
-#include <QVector>
+#include <texteditor/textdocument.h>
 
 #include <memory>
 
 namespace Haskell {
 namespace Internal {
 
-enum class TokenType {
-    Variable,
-    Constructor,
-    Operator,
-    OperatorConstructor,
-    Whitespace,
-    String,
-    StringError,
-    Char,
-    CharError,
-    EscapeSequence,
-    Integer,
-    Float,
-    Keyword,
-    Special,
-    SingleLineComment,
-    MultiLineComment,
-    Unknown
-};
+class AsyncGhcMod;
 
-class Token {
-public:
-    bool isValid() const;
-
-    TokenType type = TokenType::Unknown;
-    int startCol = -1;
-    int length = -1;
-    QStringRef text;
-
-    std::shared_ptr<QString> source; // keep the string ref alive
-};
-
-class Tokens : public QVector<Token>
+class HaskellDocument : public TextEditor::TextDocument
 {
+    Q_OBJECT
+
 public:
-    enum class State {
-        None = -1,
-        StringGap = 0, // gap == two backslashes enclosing only whitespace
-        MultiLineCommentGuard // nothing may follow that
-    };
+    HaskellDocument();
 
-    Tokens(std::shared_ptr<QString> source);
+    std::shared_ptr<AsyncGhcMod> ghcMod() const;
 
-    Token tokenAtColumn(int col) const;
-
-    std::shared_ptr<QString> source;
-    int state = int(State::None);
+private:
+    std::shared_ptr<AsyncGhcMod> m_ghcmod;
 };
 
-class HaskellTokenizer
-{
-public:
-    static Tokens tokenize(const QString &line, int startState);
-};
-
-} // Internal
-} // Haskell
+} // namespace Internal
+} // namespace Haskell

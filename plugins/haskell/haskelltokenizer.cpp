@@ -150,6 +150,19 @@ Tokens::Tokens(std::shared_ptr<QString> source)
 {
 }
 
+Token Tokens::tokenAtColumn(int col) const
+{
+    auto it = std::upper_bound(begin(), end(), col, [](int c, const Token &i) {
+        return c < i.startCol;
+    });
+    if (it == begin())
+        return Token();
+    --it;
+    if (it->startCol + it->length > col)
+        return *it;
+    return Token();
+}
+
 static int grab(const QString &line, int begin,
                 const std::function<bool(const QChar&)> &test)
 {
@@ -159,7 +172,6 @@ static int grab(const QString &line, int begin,
         ++current;
     return current - begin;
 };
-
 
 static bool isIdentifierChar(const QChar &c)
 {

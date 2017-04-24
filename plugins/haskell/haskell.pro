@@ -5,18 +5,26 @@ DEFINES += HASKELL_LIBRARY
 SOURCES += \
     haskellcompletionassist.cpp \
     haskelleditorfactory.cpp \
+    haskellhoverhandler.cpp \
     haskellplugin.cpp \
     haskellhighlighter.cpp \
-    haskelltokenizer.cpp
+    haskelltokenizer.cpp \
+    ghcmod.cpp \
+    haskellmanager.cpp \
+    haskelldocument.cpp
 
 HEADERS += \
     haskell_global.h \
     haskellcompletionassist.h \
     haskellconstants.h \
     haskelleditorfactory.h \
+    haskellhoverhandler.h \
     haskellplugin.h \
     haskellhighlighter.h \
-    haskelltokenizer.h
+    haskelltokenizer.h \
+    ghcmod.h \
+    haskellmanager.h \
+    haskelldocument.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>
