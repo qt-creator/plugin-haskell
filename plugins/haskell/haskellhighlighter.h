@@ -23,33 +23,36 @@
 **
 ****************************************************************************/
 
-#include "haskelleditorfactory.h"
+#pragma once
 
-#include "haskellcompletionassist.h"
-#include "haskellconstants.h"
-#include "haskellhighlighter.h"
+#include <texteditor/syntaxhighlighter.h>
 
-#include <texteditor/textdocument.h>
-#include <texteditor/texteditoractionhandler.h>
-
-#include <QCoreApplication>
+#include <QHash>
+#include <QTextFormat>
 
 namespace Haskell {
 namespace Internal {
 
-HaskellEditorFactory::HaskellEditorFactory()
+class Token;
+
+class HaskellHighlighter : public TextEditor::SyntaxHighlighter
 {
-    setId(Constants::C_HASKELLEDITOR_ID);
-    setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
-    addMimeType("text/x-haskell");
-    setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection);
-    setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
-    setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
-    setParenthesesMatchingEnabled(true);
-    setMarksVisible(true);
-    setCompletionAssistProvider(new HaskellCompletionAssistProvider);
-    setSyntaxHighlighterCreator([] { return new HaskellHighlighter(); });
-}
+    Q_OBJECT
+
+public:
+    HaskellHighlighter();
+
+protected:
+    void highlightBlock(const QString &text) override;
+
+private:
+    void setFontSettings(const TextEditor::FontSettings &fontSettings) override;
+    void updateFormats(const TextEditor::FontSettings &fontSettings);
+    void setTokenFormat(const Token &token, TextEditor::TextStyle style);
+    void setTokenFormatWithSpaces(const QString &text, const Token &token,
+                                  TextEditor::TextStyle style);
+    QTextCharFormat m_toplevelDeclFormat;
+};
 
 } // Internal
 } // Haskell

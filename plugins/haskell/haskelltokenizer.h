@@ -23,33 +23,69 @@
 **
 ****************************************************************************/
 
-#include "haskelleditorfactory.h"
+#pragma once
 
-#include "haskellcompletionassist.h"
-#include "haskellconstants.h"
-#include "haskellhighlighter.h"
+#include <QChar>
+#include <QString>
+#include <QVector>
 
-#include <texteditor/textdocument.h>
-#include <texteditor/texteditoractionhandler.h>
-
-#include <QCoreApplication>
+#include <memory>
 
 namespace Haskell {
 namespace Internal {
 
-HaskellEditorFactory::HaskellEditorFactory()
+enum class TokenType {
+    Variable,
+    Constructor,
+    Operator,
+    OperatorConstructor,
+    Whitespace,
+    String,
+    StringError,
+    Char,
+    CharError,
+    EscapeSequence,
+    Integer,
+    Float,
+    Keyword,
+    Special,
+    SingleLineComment,
+    MultiLineComment,
+    Unknown
+};
+
+class Token {
+public:
+    bool isValid() const;
+
+    TokenType type = TokenType::Unknown;
+    int startCol = -1;
+    int length = -1;
+    QStringRef text;
+
+    std::shared_ptr<QString> source; // keep the string ref alive
+};
+
+class Tokens : public QVector<Token>
 {
-    setId(Constants::C_HASKELLEDITOR_ID);
-    setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
-    addMimeType("text/x-haskell");
-    setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection);
-    setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
-    setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
-    setParenthesesMatchingEnabled(true);
-    setMarksVisible(true);
-    setCompletionAssistProvider(new HaskellCompletionAssistProvider);
-    setSyntaxHighlighterCreator([] { return new HaskellHighlighter(); });
-}
+public:
+    enum class State {
+        None = -1,
+        StringGap = 0, // gap == two backslashes enclosing only whitespace
+        MultiLineCommentGuard // nothing may follow that
+    };
+
+    Tokens(std::shared_ptr<QString> source);
+
+    std::shared_ptr<QString> source;
+    int state = int(State::None);
+};
+
+class HaskellTokenizer
+{
+public:
+    static Tokens tokenize(const QString &line, int startState);
+};
 
 } // Internal
 } // Haskell
