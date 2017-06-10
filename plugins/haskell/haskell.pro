@@ -12,7 +12,8 @@ SOURCES += \
     ghcmod.cpp \
     haskellmanager.cpp \
     haskelldocument.cpp \
-    optionspage.cpp
+    optionspage.cpp \
+    filecache.cpp
 
 HEADERS += \
     haskell_global.h \
@@ -26,7 +27,8 @@ HEADERS += \
     ghcmod.h \
     haskellmanager.h \
     haskelldocument.h \
-    optionspage.h
+    optionspage.h \
+    filecache.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>

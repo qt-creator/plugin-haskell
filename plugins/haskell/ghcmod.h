@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "filecache.h"
+
 #include <utils/fileutils.h>
 #include <utils/optional.h>
 #include <utils/synchronousprocess.h>
@@ -67,6 +69,7 @@ public:
     ~GhcMod();
 
     Utils::FileName basePath() const;
+    void setFileMap(const QHash<Utils::FileName, Utils::FileName> &fileMap);
 
     Utils::optional<SymbolInfo> findSymbol(const Utils::FileName &filePath, const QString &symbol);
     Utils::optional<QString> typeInfo(const Utils::FileName &filePath, int line, int col);
@@ -91,6 +94,7 @@ private:
 
     Utils::FileName m_path;
     unique_ghcmod_process m_process; // kills process on reset
+    QHash<Utils::FileName, Utils::FileName> m_fileMap;
 };
 
 class AsyncGhcMod : public QObject
@@ -114,11 +118,16 @@ public:
                                                     const QString &symbol);
     QFuture<Utils::optional<QString>> typeInfo(const Utils::FileName &filePath, int line, int col);
 
+private slots:
+    void updateCache(); // called through QMetaObject::invokeMethod
+
 private:
     void reduceQueue();
 
     QThread m_thread;
-    GhcMod m_ghcmod;
+    QObject m_threadTarget; // used to run methods in m_thread
+    GhcMod m_ghcmod; // only use in m_thread
+    FileCache m_fileCache; // only update through reduceQueue
     QVector<Operation> m_queue;
     QMutex m_mutex;
 };

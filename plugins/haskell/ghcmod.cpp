@@ -25,16 +25,23 @@
 
 #include "ghcmod.h"
 
+#include <coreplugin/editormanager/documentmodel.h>
+#include <coreplugin/idocument.h>
+#include <utils/algorithm.h>
 #include <utils/environment.h>
+#include <utils/qtcassert.h>
 
 #include <QFileInfo>
 #include <QFutureWatcher>
 #include <QLoggingCategory>
+#include <QMetaObject>
 #include <QMutexLocker>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QTime>
 #include <QTimer>
+
+#include <functional>
 
 Q_LOGGING_CATEGORY(ghcModLog, "qtc.haskell.ghcmod")
 Q_LOGGING_CATEGORY(asyncGhcModLog, "qtc.haskell.ghcmod.async")
@@ -65,6 +72,15 @@ FileName GhcMod::basePath() const
     return m_path;
 }
 
+void GhcMod::setFileMap(const QHash<FileName, FileName> &fileMap)
+{
+    if (fileMap != m_fileMap) {
+        log("setting new file map");
+        m_fileMap = fileMap;
+        shutdown();
+    }
+}
+
 static QString toUnicode(QByteArray data)
 {
     // clean zero bytes which let QString think that the string ends there
@@ -80,6 +96,15 @@ Utils::optional<SymbolInfo> GhcMod::findSymbol(const FileName &filePath, const Q
 Utils::optional<QString> GhcMod::typeInfo(const FileName &filePath, int line, int col)
 {
     return parseTypeInfo(runTypeInfo(filePath, line, col));
+}
+
+static QStringList fileMapArgs(const QHash<FileName, FileName> &map)
+{
+    QStringList result;
+    const auto end = map.cend();
+    for (auto it = map.cbegin(); it != end; ++it)
+        result << "--map-file" << it.key().toString() + "=" + it.value().toString();
+    return result;
 }
 
 bool GhcMod::ensureStarted()
@@ -99,7 +124,9 @@ bool GhcMod::ensureStarted()
     m_process.reset(new QProcess);
     m_process->setWorkingDirectory(m_path.toString());
     m_process->setEnvironment(env.toStringList());
-    m_process->start(stackExecutable.toString(), {"exec", "ghc-mod", "--", "legacy-interactive"});
+    m_process->start(stackExecutable.toString(),
+                     QStringList{"exec", "ghc-mod", "--"} + fileMapArgs(m_fileMap)
+                     << "legacy-interactive");
     if (!m_process->waitForStarted(kTimeoutMS)) {
         log("failed to start");
         return false;
@@ -223,12 +250,20 @@ void GhcMod::setStackExecutable(const FileName &filePath)
     m_stackExecutable = filePath;
 }
 
+static QList<Core::IDocument *> getOpenDocuments(const FileName &path)
+{
+    return Utils::filtered(Core::DocumentModel::openedDocuments(), [path] (Core::IDocument *doc) {
+        return path.isEmpty() || doc->filePath().isChildOf(path);
+    });
+}
+
 AsyncGhcMod::AsyncGhcMod(const FileName &path)
-    : m_ghcmod(path)
+    : m_ghcmod(path),
+      m_fileCache("haskell", std::bind(getOpenDocuments, path))
 {
     qCDebug(asyncGhcModLog) << "starting thread for" << m_ghcmod.basePath().toString();
-    moveToThread(&m_thread);
     m_thread.start();
+    m_threadTarget.moveToThread(&m_thread);
 }
 
 AsyncGhcMod::~AsyncGhcMod()
@@ -255,6 +290,7 @@ QFuture<Result> createFuture(AsyncGhcMod::Operation op,
     auto fi = new QFutureInterface<Result>;
     fi->reportStarted();
 
+    // propagate inner events to outside future
     auto opWatcher = new QFutureWatcher<Utils::optional<QByteArray>>();
     QObject::connect(opWatcher, &QFutureWatcherBase::canceled, [fi] { fi->cancel(); });
     QObject::connect(opWatcher, &QFutureWatcherBase::finished, opWatcher, &QObject::deleteLater);
@@ -268,6 +304,7 @@ QFuture<Result> createFuture(AsyncGhcMod::Operation op,
                      });
     opWatcher->setFuture(op.fi.future());
 
+    // propagate cancel from outer future to inner future
     auto fiWatcher = new QFutureWatcher<Result>();
     QObject::connect(fiWatcher, &QFutureWatcherBase::canceled, [op] { op.fi.cancel(); });
     QObject::connect(fiWatcher, &QFutureWatcherBase::finished, fiWatcher, &QObject::deleteLater);
@@ -276,27 +313,59 @@ QFuture<Result> createFuture(AsyncGhcMod::Operation op,
     return fi->future();
 }
 
+/*!
+    Asynchronously looks up the \a symbol in the context of \a filePath.
+
+    Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
+    while waiting for it to finish - doing so will result in a deadlock.
+*/
 QFuture<Utils::optional<SymbolInfo>> AsyncGhcMod::findSymbol(const FileName &filePath,
                                                              const QString &symbol)
 {
     QMutexLocker lock(&m_mutex);
     Operation op([this, filePath, symbol] { return m_ghcmod.runFindSymbol(filePath, symbol); });
     m_queue.append(op);
-    QTimer::singleShot(0, this, [this] { reduceQueue(); });
+    QTimer::singleShot(0, &m_threadTarget, [this] { reduceQueue(); });
     return createFuture<Utils::optional<SymbolInfo>>(op, &GhcMod::parseFindSymbol);
 }
 
+/*!
+    Asynchronously looks up the type at \a line and \a col in \a filePath.
+
+    Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
+    while waiting for it to finish - doing so will result in a deadlock.
+*/
 QFuture<Utils::optional<QString>> AsyncGhcMod::typeInfo(const FileName &filePath, int line, int col)
 {
     QMutexLocker lock(&m_mutex);
     Operation op([this, filePath, line, col] { return m_ghcmod.runTypeInfo(filePath, line, col); });
     m_queue.append(op);
-    QTimer::singleShot(0, this, [this] { reduceQueue(); });
+    QTimer::singleShot(0, &m_threadTarget, [this] { reduceQueue(); });
     return createFuture<Utils::optional<QString>>(op, &GhcMod::parseTypeInfo);
 }
 
+/*!
+    Synchronously runs an update of the cache of modified files.
+    This must be run on the main thread.
+
+    \internal
+*/
+void AsyncGhcMod::updateCache()
+{
+    m_fileCache.update();
+}
+
+/*!
+    Takes operations from the queue and executes them, until the queue is empty.
+    This must be run within the internal thread whenever an operation is added to the queue.
+    Canceled operations are not executed, but removed from the queue.
+    Before each operation, the cache of modified files is updated on the main thread.
+
+    \internal
+*/
 void AsyncGhcMod::reduceQueue()
 {
+    QTC_ASSERT(QThread::currentThread() != thread(), return);
     const auto takeFirst = [this]() {
         Operation op;
         m_mutex.lock();
@@ -309,6 +378,8 @@ void AsyncGhcMod::reduceQueue()
     Operation op;
     while ((op = takeFirst()).op) {
         if (!op.fi.isCanceled()) {
+            QMetaObject::invokeMethod(this, "updateCache", Qt::BlockingQueuedConnection);
+            m_ghcmod.setFileMap(m_fileCache.fileMap());
             Utils::optional<QByteArray> result = op.op();
             op.fi.reportResult(result);
         }
