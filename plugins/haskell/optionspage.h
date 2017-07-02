@@ -25,35 +25,28 @@
 
 #pragma once
 
-#include <QObject>
+#include <coreplugin/dialogs/ioptionspage.h>
+#include <utils/pathchooser.h>
 
-#include <utils/fileutils.h>
-
-QT_BEGIN_NAMESPACE
-class QSettings;
-QT_END_NAMESPACE
+#include <QPointer>
 
 namespace Haskell {
 namespace Internal {
 
-class AsyncGhcMod;
-
-class HaskellManager : public QObject
+class OptionsPage : public Core::IOptionsPage
 {
     Q_OBJECT
 
 public:
-    static HaskellManager *instance();
+    OptionsPage();
 
-    static Utils::FileName findProjectDirectory(const Utils::FileName &filePath);
-    static std::shared_ptr<AsyncGhcMod> ghcModForFile(const Utils::FileName &filePath);
-    static Utils::FileName stackExecutable();
-    static void setStackExecutable(const Utils::FileName &filePath);
-    static void readSettings(QSettings *settings);
-    static void writeSettings(QSettings *settings);
+    QWidget *widget() override;
+    void apply() override;
+    void finish() override;
 
-signals:
-    void stackExecutableChanged(const Utils::FileName &filePath);
+private:
+    QPointer<QWidget> m_widget;
+    QPointer<Utils::PathChooser> m_stackPath;
 };
 
 } // namespace Internal

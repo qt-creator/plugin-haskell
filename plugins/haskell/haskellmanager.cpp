@@ -27,10 +27,15 @@
 
 #include "ghcmod.h"
 
+#include <utils/hostosinfo.h>
+
 #include <QDir>
 #include <QFileInfo>
+#include <QSettings>
 
 #include <unordered_map>
+
+static const char kStackExecutableKey[] = "Haskell/StackExecutable";
 
 using namespace Utils;
 
@@ -41,9 +46,16 @@ class HaskellManagerPrivate
 {
 public:
     std::unordered_map<FileName, std::weak_ptr<AsyncGhcMod>> ghcModCache;
+    FileName stackExecutable;
 };
 
-Q_GLOBAL_STATIC(HaskellManagerPrivate, m_d);
+Q_GLOBAL_STATIC(HaskellManagerPrivate, m_d)
+Q_GLOBAL_STATIC(HaskellManager, m_instance)
+
+HaskellManager *HaskellManager::instance()
+{
+    return m_instance;
+}
 
 FileName HaskellManager::findProjectDirectory(const FileName &filePath)
 {
@@ -74,6 +86,44 @@ std::shared_ptr<AsyncGhcMod> HaskellManager::ghcModForFile(const FileName &fileP
     auto ghcmod = std::make_shared<AsyncGhcMod>(projectPath);
     m_d->ghcModCache.insert(std::make_pair(projectPath, ghcmod));
     return ghcmod;
+}
+
+FileName defaultStackExecutable()
+{
+    // stack from brew or the installer script from https://docs.haskellstack.org
+    // install to /usr/local/bin.
+    if (HostOsInfo::isAnyUnixHost())
+        return FileName::fromString("/usr/local/bin/stack");
+    return FileName::fromString("stack");
+}
+
+FileName HaskellManager::stackExecutable()
+{
+    return m_d->stackExecutable;
+}
+
+void HaskellManager::setStackExecutable(const FileName &filePath)
+{
+    if (filePath == m_d->stackExecutable)
+        return;
+    m_d->stackExecutable = filePath;
+    emit m_instance->stackExecutableChanged(m_d->stackExecutable);
+}
+
+void HaskellManager::readSettings(QSettings *settings)
+{
+    m_d->stackExecutable = FileName::fromString(
+                settings->value(kStackExecutableKey,
+                                defaultStackExecutable().toString()).toString());
+    emit m_instance->stackExecutableChanged(m_d->stackExecutable);
+}
+
+void HaskellManager::writeSettings(QSettings *settings)
+{
+    if (m_d->stackExecutable == defaultStackExecutable())
+        settings->remove(kStackExecutableKey);
+    else
+        settings->setValue(kStackExecutableKey, m_d->stackExecutable.toString());
 }
 
 } // namespace Internal

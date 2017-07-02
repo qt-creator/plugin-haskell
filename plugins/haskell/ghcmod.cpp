@@ -40,13 +40,15 @@ Q_LOGGING_CATEGORY(ghcModLog, "qtc.haskell.ghcmod")
 Q_LOGGING_CATEGORY(asyncGhcModLog, "qtc.haskell.ghcmod.async")
 
 // TODO do not hardcode
-const char STACK_EXE[] = "/usr/local/bin/stack";
 const int kTimeoutMS = 10 * 1000;
 
 using namespace Utils;
 
 namespace Haskell {
 namespace Internal {
+
+FileName GhcMod::m_stackExecutable = Utils::FileName::fromString("stack");
+QMutex GhcMod::m_mutex;
 
 GhcMod::GhcMod(const Utils::FileName &path)
     : m_path(path)
@@ -82,15 +84,22 @@ Utils::optional<QString> GhcMod::typeInfo(const FileName &filePath, int line, in
 
 bool GhcMod::ensureStarted()
 {
+    m_mutex.lock();
+    const FileName plainStackExecutable = m_stackExecutable;
+    m_mutex.unlock();
+    Environment env = Environment::systemEnvironment();
+    const FileName stackExecutable = env.searchInPath(plainStackExecutable.toString());
+    if (m_process && FileName::fromString(m_process->program()) != stackExecutable)
+        shutdown();
     if (m_process)
         return true;
     log("starting");
-    Environment env = Environment::systemEnvironment();
-    env.prependOrSetPath(QFileInfo(STACK_EXE).absolutePath()); // for ghc-mod finding stack back
+    // for ghc-mod finding stack back:
+    env.prependOrSetPath(stackExecutable.toFileInfo().absolutePath());
     m_process.reset(new QProcess);
     m_process->setWorkingDirectory(m_path.toString());
     m_process->setEnvironment(env.toStringList());
-    m_process->start(STACK_EXE, {"exec", "ghc-mod", "--", "legacy-interactive"});
+    m_process->start(stackExecutable.toString(), {"exec", "ghc-mod", "--", "legacy-interactive"});
     if (!m_process->waitForStarted(kTimeoutMS)) {
         log("failed to start");
         return false;
@@ -206,6 +215,12 @@ Utils::optional<QString> GhcMod::parseTypeInfo(const Utils::optional<QByteArray>
     if (result.hasMatch())
         return result.captured(1);
     return Utils::nullopt;
+}
+
+void GhcMod::setStackExecutable(const FileName &filePath)
+{
+    QMutexLocker lock(&m_mutex);
+    m_stackExecutable = filePath;
 }
 
 AsyncGhcMod::AsyncGhcMod(const FileName &path)

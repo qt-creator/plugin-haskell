@@ -11,7 +11,8 @@ SOURCES += \
     haskelltokenizer.cpp \
     ghcmod.cpp \
     haskellmanager.cpp \
-    haskelldocument.cpp
+    haskelldocument.cpp \
+    optionspage.cpp
 
 HEADERS += \
     haskell_global.h \
@@ -24,7 +25,8 @@ HEADERS += \
     haskelltokenizer.h \
     ghcmod.h \
     haskellmanager.h \
-    haskelldocument.h
+    haskelldocument.h \
+    optionspage.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>
@@ -53,3 +55,6 @@ QTC_PLUGIN_RECOMMENDS += \
 
 include(config.pri)
 include($$IDE_SOURCE_TREE/src/qtcreatorplugin.pri)
+
+RESOURCES += \
+    haskell.qrc

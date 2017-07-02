@@ -24,9 +24,14 @@
 ****************************************************************************/
 
 #include "haskellplugin.h"
+
+#include "ghcmod.h"
 #include "haskellconstants.h"
 #include "haskelleditorfactory.h"
+#include "haskellmanager.h"
+#include "optionspage.h"
 
+#include <coreplugin/icore.h>
 #include <texteditor/snippets/snippetprovider.h>
 
 namespace Haskell {
@@ -56,10 +61,18 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
     Q_UNUSED(errorString)
 
     addAutoReleasedObject(new HaskellEditorFactory);
+    addAutoReleasedObject(new OptionsPage);
 
     TextEditor::SnippetProvider::registerGroup(Constants::C_HASKELLSNIPPETSGROUP_ID,
                                                tr("Haskell", "SnippetProvider"));
 
+    connect(Core::ICore::instance(), &Core::ICore::saveSettingsRequested, this, [] {
+        HaskellManager::writeSettings(Core::ICore::settings());
+    });
+    connect(HaskellManager::instance(), &HaskellManager::stackExecutableChanged,
+            &GhcMod::setStackExecutable);
+
+    HaskellManager::readSettings(Core::ICore::settings());
     return true;
 }
 

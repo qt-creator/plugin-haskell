@@ -78,10 +78,16 @@ public:
 
     static Utils::optional<SymbolInfo> parseFindSymbol(const Utils::optional<QByteArray> &response);
     static Utils::optional<QString> parseTypeInfo(const Utils::optional<QByteArray> &response);
+
+   static void setStackExecutable(const Utils::FileName &filePath);
+
 private:
     bool ensureStarted();
     void shutdown();
     void log(const QString &message);
+
+    static Utils::FileName m_stackExecutable;
+    static QMutex m_mutex;
 
     Utils::FileName m_path;
     unique_ghcmod_process m_process; // kills process on reset
