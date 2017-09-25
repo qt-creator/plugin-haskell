@@ -26,12 +26,17 @@
 #include "haskellplugin.h"
 
 #include "ghcmod.h"
+#include "haskellbuildconfiguration.h"
 #include "haskellconstants.h"
 #include "haskelleditorfactory.h"
 #include "haskellmanager.h"
+#include "haskellproject.h"
+#include "haskellrunconfiguration.h"
 #include "optionspage.h"
+#include "stackbuildstep.h"
 
 #include <coreplugin/icore.h>
+#include <projectexplorer/projectmanager.h>
 #include <texteditor/snippets/snippetprovider.h>
 
 namespace Haskell {
@@ -62,7 +67,11 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
 
     addAutoReleasedObject(new HaskellEditorFactory);
     addAutoReleasedObject(new OptionsPage);
-
+    addAutoReleasedObject(new HaskellBuildConfigurationFactory);
+    addAutoReleasedObject(new StackBuildStepFactory);
+    addAutoReleasedObject(new HaskellRunConfigurationFactory);
+    ProjectExplorer::ProjectManager::registerProjectType<HaskellProject>(
+        Constants::C_HASKELL_PROJECT_MIMETYPE);
     TextEditor::SnippetProvider::registerGroup(Constants::C_HASKELLSNIPPETSGROUP_ID,
                                                tr("Haskell", "SnippetProvider"));
 

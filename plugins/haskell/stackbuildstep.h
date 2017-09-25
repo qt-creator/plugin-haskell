@@ -25,13 +25,35 @@
 
 #pragma once
 
+#include <projectexplorer/abstractprocessstep.h>
+
 namespace Haskell {
-namespace Constants {
+namespace Internal {
 
-const char C_HASKELLEDITOR_ID[] = "Haskell.HaskellEditor";
-const char C_HASKELLSNIPPETSGROUP_ID[] = "Haskell";
-const char C_HASKELL_PROJECT_MIMETYPE[] = "text/x-haskell-project";
-const char C_HASKELL_RUNCONFIG_ID_PREFIX[] = "Haskell.Run.";
+class StackBuildStep : public ProjectExplorer::AbstractProcessStep
+{
+    Q_OBJECT
 
+public:
+    StackBuildStep(ProjectExplorer::BuildStepList *bsl);
+
+    ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
+
+    static QString trDisplayName();
+};
+
+class StackBuildStepFactory : public ProjectExplorer::IBuildStepFactory
+{
+    // IBuildStepFactory interface
+public:
+    QList<ProjectExplorer::BuildStepInfo> availableSteps(
+        ProjectExplorer::BuildStepList *parent) const override;
+    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
+    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent,
+                                        const QVariantMap &map) override;
+    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent,
+                                      ProjectExplorer::BuildStep *product) override;
+};
+
+} // namespace Internal
 } // namespace Haskell
-} // namespace Constants

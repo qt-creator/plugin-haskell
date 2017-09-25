@@ -15,7 +15,11 @@ SOURCES += \
     optionspage.cpp \
     filecache.cpp \
     haskelleditorwidget.cpp \
-    followsymbol.cpp
+    followsymbol.cpp \
+    haskellproject.cpp \
+    haskellbuildconfiguration.cpp \
+    stackbuildstep.cpp \
+    haskellrunconfiguration.cpp
 
 HEADERS += \
     haskell_global.h \
@@ -32,7 +36,11 @@ HEADERS += \
     optionspage.h \
     filecache.h \
     haskelleditorwidget.h \
-    followsymbol.h
+    followsymbol.h \
+    haskellproject.h \
+    haskellbuildconfiguration.h \
+    stackbuildstep.h \
+    haskellrunconfiguration.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>
@@ -52,6 +60,7 @@ QTC_LIB_DEPENDS += \
 
 QTC_PLUGIN_DEPENDS += \
     coreplugin \
+    projectexplorer \
     texteditor
 
 QTC_PLUGIN_RECOMMENDS += \

@@ -25,13 +25,33 @@
 
 #pragma once
 
+#include <projectexplorer/project.h>
+#include <projectexplorer/projectnodes.h>
+
 namespace Haskell {
-namespace Constants {
+namespace Internal {
 
-const char C_HASKELLEDITOR_ID[] = "Haskell.HaskellEditor";
-const char C_HASKELLSNIPPETSGROUP_ID[] = "Haskell";
-const char C_HASKELL_PROJECT_MIMETYPE[] = "text/x-haskell-project";
-const char C_HASKELL_RUNCONFIG_ID_PREFIX[] = "Haskell.Run.";
+class HaskellProjectNode : public ProjectExplorer::ProjectNode
+{
+public:
+    HaskellProjectNode(const Utils::FileName &projectFilePath, Core::Id id);
+};
 
+class HaskellProject : public ProjectExplorer::Project
+{
+    Q_OBJECT
+
+public:
+    explicit HaskellProject(const Utils::FileName &fileName);
+
+    static bool isHaskellProject(Project *project);
+    static HaskellProject *toHaskellProject(Project *project);
+
+    QList<Core::Id> availableRunConfigurationIds() const;
+
+private:
+    void updateFiles();
+};
+
+} // namespace Internal
 } // namespace Haskell
-} // namespace Constants
