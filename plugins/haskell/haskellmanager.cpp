@@ -29,6 +29,7 @@
 
 #include <utils/hostosinfo.h>
 
+#include <QCoreApplication>
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
@@ -124,6 +125,11 @@ void HaskellManager::writeSettings(QSettings *settings)
         settings->remove(kStackExecutableKey);
     else
         settings->setValue(kStackExecutableKey, m_d->stackExecutable.toString());
+}
+
+QString HaskellManager::trLookingUp(const QString &name)
+{
+    return QCoreApplication::translate("HaskellManager", "Looking up \"%1\"...").arg(name);
 }
 
 } // namespace Internal

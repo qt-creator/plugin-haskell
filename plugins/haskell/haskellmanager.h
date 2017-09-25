@@ -52,6 +52,8 @@ public:
     static void readSettings(QSettings *settings);
     static void writeSettings(QSettings *settings);
 
+    static QString trLookingUp(const QString &name);
+
 signals:
     void stackExecutableChanged(const Utils::FileName &filePath);
 };

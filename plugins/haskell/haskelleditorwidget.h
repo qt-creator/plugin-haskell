@@ -23,39 +23,33 @@
 **
 ****************************************************************************/
 
-#include "haskelleditorfactory.h"
+#pragma once
 
-#include "haskellcompletionassist.h"
-#include "haskellconstants.h"
-#include "haskelldocument.h"
-#include "haskelleditorwidget.h"
-#include "haskellhighlighter.h"
-#include "haskellhoverhandler.h"
+#include "followsymbol.h"
 
-#include <texteditor/textdocument.h>
-#include <texteditor/texteditoractionhandler.h>
-
-#include <QCoreApplication>
+#include <texteditor/texteditor.h>
+#include <utils/optional.h>
 
 namespace Haskell {
 namespace Internal {
 
-HaskellEditorFactory::HaskellEditorFactory()
-{
-    setId(Constants::C_HASKELLEDITOR_ID);
-    setDisplayName(QCoreApplication::translate("OpenWith::Editors", "Haskell Editor"));
-    addMimeType("text/x-haskell");
-    setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection
-                            | TextEditor::TextEditorActionHandler::FollowSymbolUnderCursor);
-    addHoverHandler(new HaskellHoverHandler);
-    setDocumentCreator([] { return new HaskellDocument(); });
-    setEditorWidgetCreator([] { return new HaskellEditorWidget; });
-    setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
-    setParenthesesMatchingEnabled(true);
-    setMarksVisible(true);
-    setCompletionAssistProvider(new HaskellCompletionAssistProvider);
-    setSyntaxHighlighterCreator([] { return new HaskellHighlighter(); });
-}
+class Token;
 
-} // Internal
-} // Haskell
+class HaskellEditorWidget : public TextEditor::TextEditorWidget
+{
+public:
+    HaskellEditorWidget(QWidget *parent = 0);
+
+    static Utils::optional<Token> symbolAt(QTextDocument *doc, int position,
+                                           int *line, int *column);
+
+protected:
+    Link findLinkAt(const QTextCursor &cursor, bool resolveTarget = true,
+                    bool inNextSplit = false) override;
+
+private:
+    FollowSymbolAssistProvider m_followSymbolAssistProvider;
+};
+
+} // namespace Internal
+} // namespace Haskell

@@ -13,7 +13,9 @@ SOURCES += \
     haskellmanager.cpp \
     haskelldocument.cpp \
     optionspage.cpp \
-    filecache.cpp
+    filecache.cpp \
+    haskelleditorwidget.cpp \
+    followsymbol.cpp
 
 HEADERS += \
     haskell_global.h \
@@ -28,7 +30,9 @@ HEADERS += \
     haskellmanager.h \
     haskelldocument.h \
     optionspage.h \
-    filecache.h
+    filecache.h \
+    haskelleditorwidget.h \
+    followsymbol.h
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>

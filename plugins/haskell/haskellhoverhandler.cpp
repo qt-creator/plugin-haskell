@@ -26,6 +26,8 @@
 #include "haskellhoverhandler.h"
 
 #include "haskelldocument.h"
+#include "haskelleditorwidget.h"
+#include "haskellmanager.h"
 #include "haskelltokenizer.h"
 
 #include <texteditor/textdocument.h>
@@ -34,11 +36,6 @@
 #include <utils/runextensions.h>
 #include <utils/synchronousprocess.h>
 #include <utils/tooltip/tooltip.h>
-
-#include <QTextBlock>
-#include <QTextDocument>
-
-#include <functional>
 
 using namespace Utils;
 
@@ -77,27 +74,16 @@ void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidg
 {
     cancel();
     m_name.clear();
-    editorWidget->convertPosition(pos, &m_line, &m_col);
-    if (m_line < 0 || m_col < 0)
-        return;
-    QTextBlock block = editorWidget->document()->findBlockByNumber(m_line - 1);
-    if (block.text().isEmpty())
-        return;
-    m_filePath = editorWidget->textDocument()->filePath();
-    const int startState = block.previous().isValid() ? block.previous().userState() : -1;
-    const Tokens tokens = HaskellTokenizer::tokenize(block.text(), startState);
-    const Token token = tokens.tokenAtColumn(m_col);
-    if (token.isValid()
-            && (token.type == TokenType::Variable
-                || token.type == TokenType::Operator
-                || token.type == TokenType::Constructor
-                || token.type == TokenType::OperatorConstructor)) {
-       m_name = token.text.toString();
-    }
-    if (m_name.isEmpty())
-        setPriority(-1);
-    else
+    m_filePath.clear();
+    const Utils::optional<Token> token = HaskellEditorWidget::symbolAt(editorWidget->document(),
+                                                                       pos, &m_line, &m_col);
+    if (token) {
+        m_filePath = editorWidget->textDocument()->filePath();
+        m_name = token->text.toString();
         setPriority(Priority_Tooltip);
+    } else {
+        setPriority(-1);
+    }
 }
 
 static void tryShowToolTip(const QPointer<QWidget> &widget, const QPoint &point,
@@ -125,7 +111,7 @@ void HaskellHoverHandler::operateTooltip(TextEditor::TextEditorWidget *editorWid
         Utils::ToolTip::hide();
         return;
     }
-    Utils::ToolTip::show(point, tr("Looking up \"%1\"").arg(m_name), editorWidget);
+    Utils::ToolTip::show(point, HaskellManager::trLookingUp(m_name), editorWidget);
 
     QPointer<QWidget> widget = editorWidget;
     std::shared_ptr<AsyncGhcMod> ghcmod;
