@@ -48,19 +48,7 @@ HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
 {
     registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
-    setSupportedTargetDeviceTypes({ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE});
-}
-
-QList<BuildTargetInfo> HaskellRunConfigurationFactory::availableBuildTargets(
-    Target *parent, IRunConfigurationFactory::CreationMode mode) const
-{
-    Q_UNUSED(mode)
-    const auto project = HaskellProject::toHaskellProject(parent->project());
-    if (!project)
-        return {};
-    return Utils::transform(project->availableExecutables(), [](const QString &name) {
-        return BuildTargetInfo(name, Utils::FileName(), Utils::FileName());
-    });
+    addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)
@@ -117,10 +105,14 @@ bool HaskellRunConfiguration::fromMap(const QVariantMap &map)
     if (!RunConfiguration::fromMap(map))
         return false;
     m_executable = map.value(QString(Constants::C_HASKELL_EXECUTABLE_KEY)).toString();
-    if (m_executable.isEmpty())
-        m_executable = ProjectExplorer::idFromMap(map).suffixAfter(id());
     setDefaultDisplayName(m_executable);
     return true;
+}
+
+void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
+{
+    m_executable = info.targetName;
+    setDefaultDisplayName(m_executable);
 }
 
 QVariantMap HaskellRunConfiguration::toMap() const

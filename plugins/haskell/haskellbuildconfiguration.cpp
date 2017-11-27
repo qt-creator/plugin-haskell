@@ -110,7 +110,6 @@ void HaskellBuildConfiguration::setBuildType(BuildConfiguration::BuildType type)
 void HaskellBuildConfiguration::initialize(const BuildInfo *info)
 {
     BuildConfiguration::initialize(info);
-    QTC_ASSERT(HaskellProject::isHaskellProject(target()->project()), return);
     setBuildDirectory(info->buildDirectory);
     setBuildType(info->buildType);
     setDisplayName(info->displayName);

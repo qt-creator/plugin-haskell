@@ -79,7 +79,8 @@ IAssistProposal *FollowSymbolAssistProcessor::immediateProposal(const AssistInte
     item->setData(QString());
     item->setOrder(-1000);
 
-    auto proposal = new GenericProposal(interface->position(), {item});
+    const QList<TextEditor::AssistProposalItemInterface *> list = {item};
+    auto proposal = new GenericProposal(interface->position(), list);
     proposal->setFragile(true);
     return proposal;
 }

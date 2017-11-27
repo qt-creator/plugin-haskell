@@ -30,15 +30,10 @@
 namespace Haskell {
 namespace Internal {
 
-class HaskellRunConfigurationFactory : public ProjectExplorer::IRunConfigurationFactory
+class HaskellRunConfigurationFactory : public ProjectExplorer::RunConfigurationFactory
 {
-    Q_OBJECT
-
 public:
     HaskellRunConfigurationFactory();
-
-    QList<ProjectExplorer::BuildTargetInfo> availableBuildTargets(ProjectExplorer::Target *parent,
-                                                                  CreationMode mode) const override;
 };
 
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
@@ -48,13 +43,15 @@ class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
 public:
     HaskellRunConfiguration(ProjectExplorer::Target *parent);
 
-    QWidget *createConfigurationWidget() override;
-    ProjectExplorer::Runnable runnable() const override;
-
-    bool fromMap(const QVariantMap &map) override;
-    QVariantMap toMap() const override;
-
 private:
+    QWidget *createConfigurationWidget() final;
+    ProjectExplorer::Runnable runnable() const final;
+    void handleBuildSystemDataUpdated();
+
+    bool fromMap(const QVariantMap &map) final;
+    QVariantMap toMap() const final;
+    void doAdditionalSetup(const ProjectExplorer::RunConfigurationCreationInfo &info) final;
+
     QString m_executable;
 };
 

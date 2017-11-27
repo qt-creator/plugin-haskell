@@ -45,12 +45,10 @@ public:
     explicit HaskellProject(const Utils::FileName &fileName);
 
     static bool isHaskellProject(Project *project);
-    static HaskellProject *toHaskellProject(Project *project);
-
-    QList<QString> availableExecutables() const;
 
 private:
     void updateFiles();
+    void updateApplicationTargets(ProjectExplorer::Target *target);
 };
 
 } // namespace Internal

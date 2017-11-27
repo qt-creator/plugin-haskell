@@ -29,8 +29,13 @@
 
 #include <coreplugin/iversioncontrol.h>
 #include <coreplugin/vcsmanager.h>
+
+#include <projectexplorer/buildtargetinfo.h>
+#include <projectexplorer/target.h>
+
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
+#include <utils/qtcassert.h>
 #include <utils/runextensions.h>
 
 #include <QFile>
@@ -70,23 +75,12 @@ HaskellProject::HaskellProject(const Utils::FileName &fileName)
     setId(Constants::C_HASKELL_PROJECT_ID);
     setDisplayName(fileName.toFileInfo().completeBaseName());
     updateFiles();
+    connect(this, &Project::activeTargetChanged, this, &HaskellProject::updateApplicationTargets);
 }
 
 bool HaskellProject::isHaskellProject(Project *project)
 {
     return project && project->id() == Constants::C_HASKELL_PROJECT_ID;
-}
-
-HaskellProject *HaskellProject::toHaskellProject(Project *project)
-{
-    if (project && project->id() == Constants::C_HASKELL_PROJECT_ID)
-        return static_cast<HaskellProject *>(project);
-    return nullptr;
-}
-
-QList<QString> HaskellProject::availableExecutables() const
-{
-    return parseExecutableNames(projectFilePath()).toList();
 }
 
 void HaskellProject::updateFiles()
@@ -112,6 +106,28 @@ void HaskellProject::updateFiles()
         setRootProjectNode(root);
         emitParsingFinished(true);
     });
+}
+
+void HaskellProject::updateApplicationTargets(Target *target)
+{
+    QTC_ASSERT(target, return);
+    const QVector<QString> executables = parseExecutableNames(projectFilePath());
+    const Utils::FileName projFilePath = projectFilePath();
+    const QList<BuildTargetInfo> appTargets
+        = Utils::transform<QList>(executables, [projFilePath](const QString &executable) {
+              BuildTargetInfo bti;
+              bti.targetName = executable;
+              bti.displayName = executable;
+              bti.buildKey = executable;
+              bti.targetFilePath = FileName::fromString(executable);
+              bti.projectFilePath = projFilePath;
+              bti.isQtcRunnable = true;
+              return bti;
+          });
+    BuildTargetInfoList list;
+    list.list = appTargets;
+    target->setApplicationTargets(list);
+    target->updateDefaultRunConfigurations();
 }
 
 } // namespace Internal

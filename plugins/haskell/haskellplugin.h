@@ -38,12 +38,14 @@ class HaskellPlugin : public ExtensionSystem::IPlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QtCreatorPlugin" FILE "Haskell.json")
 
 public:
-    HaskellPlugin();
-    ~HaskellPlugin();
+    HaskellPlugin() = default;
+    ~HaskellPlugin() final;
 
-    bool initialize(const QStringList &arguments, QString *errorString);
-    void extensionsInitialized();
-    ShutdownFlag aboutToShutdown();
+private:
+    bool initialize(const QStringList &arguments, QString *errorString) final;
+    void extensionsInitialized() final {}
+
+    class HaskellPluginPrivate *d = nullptr;
 };
 
 } // namespace Internal
