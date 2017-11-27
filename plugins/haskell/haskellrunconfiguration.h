@@ -50,7 +50,9 @@ public:
 
     QWidget *createConfigurationWidget() override;
     ProjectExplorer::Runnable runnable() const override;
-    void initialize(Core::Id id);
+
+    bool fromMap(const QVariantMap &map) override;
+    QVariantMap toMap() const override;
 
 private:
     QString m_executable;

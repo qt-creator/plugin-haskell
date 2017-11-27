@@ -39,8 +39,6 @@
 using namespace ProjectExplorer;
 using namespace Utils;
 
-const char C_HASKELL_PROJECT_ID[] = "Haskell.Project";
-
 namespace Haskell {
 namespace Internal {
 
@@ -69,19 +67,19 @@ HaskellProjectNode::HaskellProjectNode(const FileName &projectFilePath, Core::Id
 HaskellProject::HaskellProject(const Utils::FileName &fileName)
     : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName)
 {
-    setId(C_HASKELL_PROJECT_ID);
+    setId(Constants::C_HASKELL_PROJECT_ID);
     setDisplayName(fileName.toFileInfo().completeBaseName());
     updateFiles();
 }
 
 bool HaskellProject::isHaskellProject(Project *project)
 {
-    return project && project->id() == C_HASKELL_PROJECT_ID;
+    return project && project->id() == Constants::C_HASKELL_PROJECT_ID;
 }
 
 HaskellProject *HaskellProject::toHaskellProject(Project *project)
 {
-    if (project && project->id() == C_HASKELL_PROJECT_ID)
+    if (project && project->id() == Constants::C_HASKELL_PROJECT_ID)
         return static_cast<HaskellProject *>(project);
     return nullptr;
 }

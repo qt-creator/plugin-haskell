@@ -75,30 +75,10 @@ QString StackBuildStep::trDisplayName()
     return tr("Stack Build");
 }
 
-QList<BuildStepInfo> StackBuildStepFactory::availableSteps(BuildStepList *parent) const
+StackBuildStepFactory::StackBuildStepFactory()
 {
-    Q_UNUSED(parent)
-    return {BuildStepInfo(C_STACK_BUILD_STEP_ID, StackBuildStep::trDisplayName())};
-}
-
-BuildStep *StackBuildStepFactory::create(BuildStepList *parent, Core::Id id)
-{
-    Q_UNUSED(id)
-    return new StackBuildStep(parent);
-}
-
-BuildStep *StackBuildStepFactory::restore(BuildStepList *parent, const QVariantMap &map)
-{
-    auto step = new StackBuildStep(parent);
-    step->fromMap(map);
-    return step;
-}
-
-BuildStep *StackBuildStepFactory::clone(BuildStepList *parent, BuildStep *product)
-{
-    auto step = new StackBuildStep(parent);
-    step->fromMap(product->toMap());
-    return step;
+    registerStep<StackBuildStep>(C_STACK_BUILD_STEP_ID);
+    setDisplayName(StackBuildStep::StackBuildStep::trDisplayName());
 }
 
 } // namespace Internal

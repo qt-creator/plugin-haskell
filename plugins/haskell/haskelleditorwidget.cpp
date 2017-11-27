@@ -63,14 +63,14 @@ Utils::optional<Token> HaskellEditorWidget::symbolAt(QTextDocument *doc, int pos
     return Utils::nullopt;
 }
 
-TextEditorWidget::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,
-                                                       bool resolveTarget, bool inNextSplit)
+Utils::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,
+                                            bool resolveTarget, bool inNextSplit)
 {
     int line, column;
     const Utils::optional<Token> symbol = symbolAt(document(), cursor.position(), &line, &column);
     if (symbol) {
         const QTextBlock block = document()->findBlockByNumber(line - 1);
-        Link link;
+        Utils::Link link;
         link.linkTextStart = block.position() + symbol->startCol;
         link.linkTextEnd = link.linkTextStart + symbol->length;
         if (resolveTarget) {
@@ -79,7 +79,7 @@ TextEditorWidget::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor
         }
         return link;
     }
-    return Link();
+    return Utils::Link();
 }
 
 } // namespace Internal

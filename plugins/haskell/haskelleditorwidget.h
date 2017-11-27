@@ -44,8 +44,8 @@ public:
                                            int *line, int *column);
 
 protected:
-    Link findLinkAt(const QTextCursor &cursor, bool resolveTarget = true,
-                    bool inNextSplit = false) override;
+    Utils::Link findLinkAt(const QTextCursor &cursor, bool resolveTarget = true,
+                           bool inNextSplit = false) override;
 
 private:
     FollowSymbolAssistProvider m_followSymbolAssistProvider;

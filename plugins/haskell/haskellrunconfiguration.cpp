@@ -60,7 +60,7 @@ QList<QString> HaskellRunConfigurationFactory::availableBuildTargets(
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)
-    : RunConfiguration(parent)
+    : RunConfiguration(parent, Constants::C_HASKELL_RUNCONFIG_ID_PREFIX)
 {
     auto argumentAspect = new ArgumentsAspect(this, "Haskell.RunAspect.Arguments");
     auto workingDirAspect = new WorkingDirectoryAspect(this, "Haskell.RunAspect.WorkingDirectory");
@@ -108,11 +108,22 @@ Runnable HaskellRunConfiguration::runnable() const
     return r;
 }
 
-void HaskellRunConfiguration::initialize(Core::Id id)
+bool HaskellRunConfiguration::fromMap(const QVariantMap &map)
 {
-    RunConfiguration::initialize(id);
-    m_executable = id.suffixAfter(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
+    if (!RunConfiguration::fromMap(map))
+        return false;
+    m_executable = map.value(QString(Constants::C_HASKELL_EXECUTABLE_KEY)).toString();
+    if (m_executable.isEmpty())
+        m_executable = ProjectExplorer::idFromMap(map).suffixAfter(id());
     setDefaultDisplayName(m_executable);
+    return true;
+}
+
+QVariantMap HaskellRunConfiguration::toMap() const
+{
+    QVariantMap map = RunConfiguration::toMap();
+    map.insert(QString(Constants::C_HASKELL_EXECUTABLE_KEY), m_executable);
+    return map;
 }
 
 } // namespace Internal

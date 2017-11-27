@@ -38,21 +38,10 @@ class HaskellBuildConfigurationFactory : public ProjectExplorer::IBuildConfigura
 public:
     HaskellBuildConfigurationFactory();
 
-    int priority(const ProjectExplorer::Target *parent) const override;
     QList<ProjectExplorer::BuildInfo *> availableBuilds(
         const ProjectExplorer::Target *parent) const override;
-    int priority(const ProjectExplorer::Kit *k, const QString &projectPath) const override;
     QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k,
                                                         const QString &projectPath) const override;
-    ProjectExplorer::BuildConfiguration *create(
-        ProjectExplorer::Target *parent, const ProjectExplorer::BuildInfo *info) const override;
-    bool canRestore(const ProjectExplorer::Target *parent, const QVariantMap &map) const override;
-    ProjectExplorer::BuildConfiguration *restore(ProjectExplorer::Target *parent,
-                                                 const QVariantMap &map) override;
-    bool canClone(const ProjectExplorer::Target *parent,
-                  ProjectExplorer::BuildConfiguration *product) const override;
-    ProjectExplorer::BuildConfiguration *clone(
-        ProjectExplorer::Target *parent, ProjectExplorer::BuildConfiguration *product) override;
 };
 
 class HaskellBuildConfiguration : public ProjectExplorer::BuildConfiguration
@@ -65,6 +54,7 @@ public:
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     BuildType buildType() const override;
     void setBuildType(BuildType type);
+    void initialize(const ProjectExplorer::BuildInfo *info) override;
 
 private:
     BuildType m_buildType = BuildType::Release;

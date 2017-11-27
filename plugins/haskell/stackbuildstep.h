@@ -42,17 +42,10 @@ public:
     static QString trDisplayName();
 };
 
-class StackBuildStepFactory : public ProjectExplorer::IBuildStepFactory
+class StackBuildStepFactory : public ProjectExplorer::BuildStepFactory
 {
-    // IBuildStepFactory interface
 public:
-    QList<ProjectExplorer::BuildStepInfo> availableSteps(
-        ProjectExplorer::BuildStepList *parent) const override;
-    ProjectExplorer::BuildStep *create(ProjectExplorer::BuildStepList *parent, Core::Id id) override;
-    ProjectExplorer::BuildStep *restore(ProjectExplorer::BuildStepList *parent,
-                                        const QVariantMap &map) override;
-    ProjectExplorer::BuildStep *clone(ProjectExplorer::BuildStepList *parent,
-                                      ProjectExplorer::BuildStep *product) override;
+    StackBuildStepFactory();
 };
 
 } // namespace Internal

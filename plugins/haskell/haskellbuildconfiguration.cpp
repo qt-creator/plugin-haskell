@@ -51,11 +51,11 @@ const char C_HASKELL_BUILDCONFIGURATION_ID[] = "Haskell.BuildConfiguration";
 namespace Haskell {
 namespace Internal {
 
-HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory() {}
-
-int HaskellBuildConfigurationFactory::priority(const Target *parent) const
+HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory()
 {
-    return HaskellProject::isHaskellProject(parent->project()) ? 0 : -1;
+    registerBuildConfiguration<HaskellBuildConfiguration>(C_HASKELL_BUILDCONFIGURATION_ID);
+    setSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
+    setSupportedProjectMimeTypeName(Constants::C_HASKELL_PROJECT_MIMETYPE);
 }
 
 static QList<BuildInfo *> createInfos(const HaskellBuildConfigurationFactory *factory,
@@ -74,7 +74,6 @@ static QList<BuildInfo *> createInfos(const HaskellBuildConfigurationFactory *fa
 QList<BuildInfo *> HaskellBuildConfigurationFactory::availableBuilds(const Target *parent) const
 {
     // Entries that are available in add build configuration dropdown
-    QTC_ASSERT(priority(parent) > -1, return {});
     return Utils::transform(createInfos(this, parent->kit(), parent->project()->projectFilePath()),
                             [](BuildInfo *info) {
                                 info->displayName.clear();
@@ -82,64 +81,11 @@ QList<BuildInfo *> HaskellBuildConfigurationFactory::availableBuilds(const Targe
                             });
 }
 
-int HaskellBuildConfigurationFactory::priority(const Kit *k, const QString &projectPath) const
-{
-    if (k && Utils::mimeTypeForFile(projectPath).matchesName(Constants::C_HASKELL_PROJECT_MIMETYPE))
-        return 0;
-    return -1;
-}
-
 QList<BuildInfo *> HaskellBuildConfigurationFactory::availableSetups(
     const Kit *k, const QString &projectPath) const
 {
     QTC_ASSERT(priority(k, projectPath) > -1, return {});
     return createInfos(this, k, Utils::FileName::fromString(projectPath));
-}
-
-BuildConfiguration *HaskellBuildConfigurationFactory::create(Target *parent,
-                                                             const BuildInfo *info) const
-{
-    QTC_ASSERT(HaskellProject::isHaskellProject(parent->project()), return nullptr);
-    auto config = new HaskellBuildConfiguration(parent);
-    config->setBuildDirectory(info->buildDirectory);
-    config->setBuildType(info->buildType);
-    config->setDisplayName(info->displayName);
-
-    BuildStepList *buildSteps = config->stepList(Core::Id(ProjectExplorer::Constants::BUILDSTEPS_BUILD));
-    auto stackBuildStep = new StackBuildStep(buildSteps);
-    buildSteps->appendStep(stackBuildStep);
-
-    return config;
-}
-
-bool HaskellBuildConfigurationFactory::canRestore(const Target *parent, const QVariantMap &map) const
-{
-    Q_UNUSED(map)
-    return HaskellProject::isHaskellProject(parent->project());
-}
-
-BuildConfiguration *HaskellBuildConfigurationFactory::restore(Target *parent, const QVariantMap &map)
-{
-    QTC_ASSERT(canRestore(parent, map), return nullptr);
-    auto config = new HaskellBuildConfiguration(parent);
-    config->fromMap(map);
-    return config;
-}
-
-bool HaskellBuildConfigurationFactory::canClone(const Target *parent,
-                                                BuildConfiguration *product) const
-{
-    Q_UNUSED(parent)
-    return product->id() == C_HASKELL_BUILDCONFIGURATION_ID;
-}
-
-BuildConfiguration *HaskellBuildConfigurationFactory::clone(Target *parent,
-                                                            BuildConfiguration *product)
-{
-    QTC_ASSERT(canClone(parent, product), return nullptr);
-    auto config = new HaskellBuildConfiguration(parent);
-    config->fromMap(product->toMap());
-    return config;
 }
 
 HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target)
@@ -159,6 +105,19 @@ BuildConfiguration::BuildType HaskellBuildConfiguration::buildType() const
 void HaskellBuildConfiguration::setBuildType(BuildConfiguration::BuildType type)
 {
     m_buildType = type;
+}
+
+void HaskellBuildConfiguration::initialize(const BuildInfo *info)
+{
+    BuildConfiguration::initialize(info);
+    QTC_ASSERT(HaskellProject::isHaskellProject(target()->project()), return);
+    setBuildDirectory(info->buildDirectory);
+    setBuildType(info->buildType);
+    setDisplayName(info->displayName);
+
+    BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
+    auto stackBuildStep = new StackBuildStep(buildSteps);
+    buildSteps->appendStep(stackBuildStep);
 }
 
 HaskellBuildConfigurationWidget::HaskellBuildConfigurationWidget(HaskellBuildConfiguration *bc)
