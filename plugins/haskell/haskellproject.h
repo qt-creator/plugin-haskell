@@ -47,7 +47,7 @@ public:
     static bool isHaskellProject(Project *project);
     static HaskellProject *toHaskellProject(Project *project);
 
-    QList<Core::Id> availableRunConfigurationIds() const;
+    QList<QString> availableExecutables() const;
 
 private:
     void updateFiles();

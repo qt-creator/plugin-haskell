@@ -31,6 +31,7 @@
 
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/localenvironmentaspect.h>
+#include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/runconfigurationaspects.h>
 #include <projectexplorer/runnables.h>
 #include <projectexplorer/target.h>
@@ -43,57 +44,19 @@ using namespace ProjectExplorer;
 namespace Haskell {
 namespace Internal {
 
-HaskellRunConfigurationFactory::HaskellRunConfigurationFactory() {}
+HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
+{
+    registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
+    setSupportedProjectType<HaskellProject>();
+    setSupportedTargetDeviceTypes({ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE});
+}
 
-QList<Core::Id> HaskellRunConfigurationFactory::availableCreationIds(
-    Target *parent,
-    IRunConfigurationFactory::CreationMode mode) const
+QList<QString> HaskellRunConfigurationFactory::availableBuildTargets(
+    Target *parent, IRunConfigurationFactory::CreationMode mode) const
 {
     Q_UNUSED(mode)
     const auto project = HaskellProject::toHaskellProject(parent->project());
-    if (project)
-        return project->availableRunConfigurationIds();
-    return {};
-}
-
-QString HaskellRunConfigurationFactory::displayNameForId(Core::Id id) const
-{
-    return id.suffixAfter(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
-}
-
-bool HaskellRunConfigurationFactory::canCreate(Target *parent, Core::Id id) const
-{
-    return id.name().startsWith(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX)
-           && HaskellProject::isHaskellProject(parent->project());
-}
-
-bool HaskellRunConfigurationFactory::canRestore(Target *parent, const QVariantMap &map) const
-{
-    return canCreate(parent, idFromMap(map));
-}
-
-bool HaskellRunConfigurationFactory::canClone(Target *parent, RunConfiguration *product) const
-{
-    return canCreate(parent, product->id());
-}
-
-RunConfiguration *HaskellRunConfigurationFactory::clone(Target *parent, RunConfiguration *product)
-{
-    return cloneHelper<HaskellRunConfiguration>(parent, product);
-}
-
-RunConfiguration *HaskellRunConfigurationFactory::doCreate(Target *parent, Core::Id id)
-{
-    QTC_ASSERT(canCreate(parent, id), return nullptr);
-    return createHelper<HaskellRunConfiguration>(parent, id);
-}
-
-RunConfiguration *HaskellRunConfigurationFactory::doRestore(Target *parent, const QVariantMap &map)
-{
-    QTC_ASSERT(canRestore(parent, map), return nullptr);
-    auto config = doCreate(parent, idFromMap(map));
-    config->fromMap(map);
-    return config;
+    return project ? project->availableExecutables() : QList<QString>();
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)

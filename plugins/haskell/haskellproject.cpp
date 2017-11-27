@@ -86,11 +86,9 @@ HaskellProject *HaskellProject::toHaskellProject(Project *project)
     return nullptr;
 }
 
-QList<Core::Id> HaskellProject::availableRunConfigurationIds() const
+QList<QString> HaskellProject::availableExecutables() const
 {
-    return Utils::transform<QList>(parseExecutableNames(projectFilePath()), [](const QString &exe) {
-        return Core::Id(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX).withSuffix(exe);
-    });
+    return parseExecutableNames(projectFilePath()).toList();
 }
 
 void HaskellProject::updateFiles()
