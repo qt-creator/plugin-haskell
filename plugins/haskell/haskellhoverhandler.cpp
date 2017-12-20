@@ -87,17 +87,19 @@ void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidg
 }
 
 static void tryShowToolTip(const QPointer<QWidget> &widget, const QPoint &point,
-                           QFuture<Utils::optional<QString>> typeFuture,
-                           QFuture<Utils::optional<SymbolInfo>> symbolFuture)
+                           QFuture<QStringOrError> typeFuture,
+                           QFuture<SymbolInfoOrError> symbolFuture)
 {
     if (Utils::ToolTip::isVisible() && widget
             && symbolFuture.isResultReadyAt(0) && typeFuture.isResultReadyAt(0)) {
-        const Utils::optional<QString> type = typeFuture.result();
-        const Utils::optional<SymbolInfo> info = symbolFuture.result();
-        const QString typeString = !type || type.value().isEmpty()
+        const QStringOrError typeOrError = typeFuture.result();
+        const SymbolInfoOrError infoOrError = symbolFuture.result();
+        const QString *type = Utils::get_if<QString>(&typeOrError);
+        const SymbolInfo *info = Utils::get_if<SymbolInfo>(&infoOrError);
+        const QString typeString = !type || type->isEmpty()
                 ? QString()
-                : toCode(":: " + type.value());
-        const QString infoString = info ? symbolToHtml(info.value()) : QString();
+                : toCode(":: " + *type);
+        const QString infoString = info ? symbolToHtml(*info) : QString();
         const QString tip = typeString + infoString;
         Utils::ToolTip::show(point, tip, widget);
     }
@@ -123,13 +125,13 @@ void HaskellHoverHandler::operateTooltip(TextEditor::TextEditorWidget *editorWid
     Utils::onResultReady(m_typeFuture,
                          [typeFuture = m_typeFuture, symbolFuture = m_symbolFuture,
                           ghcmod, widget, point] // hold shared ghcmod pointer
-                         (const Utils::optional<QString> &) {
+                         (const QStringOrError &) {
                              tryShowToolTip(widget, point, typeFuture, symbolFuture);
                          });
     Utils::onResultReady(m_symbolFuture,
                          [typeFuture = m_typeFuture, symbolFuture = m_symbolFuture,
                           ghcmod, widget, point] // hold shared ghcmod pointer
-                         (const Utils::optional<SymbolInfo> &) {
+                         (const SymbolInfoOrError &) {
                              tryShowToolTip(widget, point, typeFuture, symbolFuture);
                          });
 }

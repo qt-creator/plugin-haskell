@@ -30,6 +30,7 @@
 #include <utils/fileutils.h>
 #include <utils/optional.h>
 #include <utils/synchronousprocess.h>
+#include <utils/variant.h>
 
 #include <QFuture>
 #include <QMutex>
@@ -44,6 +45,16 @@ QT_END_NAMESPACE
 namespace Haskell {
 namespace Internal {
 
+class Error {
+public:
+    enum class Type {
+        FailedToStartStack,
+        Other // TODO get rid of it
+    };
+    Type type;
+    QString details;
+};
+
 class SymbolInfo {
 public:
     QStringList definition;
@@ -53,6 +64,10 @@ public:
     int col = -1;
     QString module;
 };
+
+using QByteArrayOrError = Utils::variant<QByteArray, Error>;
+using QStringOrError = Utils::variant<QString, Error>;
+using SymbolInfoOrError = Utils::variant<SymbolInfo, Error>;
 
 template <typename T> class ghcmod_deleter;
 template <> class ghcmod_deleter<QProcess>
@@ -71,21 +86,21 @@ public:
     Utils::FileName basePath() const;
     void setFileMap(const QHash<Utils::FileName, Utils::FileName> &fileMap);
 
-    Utils::optional<SymbolInfo> findSymbol(const Utils::FileName &filePath, const QString &symbol);
-    Utils::optional<QString> typeInfo(const Utils::FileName &filePath, int line, int col);
+    SymbolInfoOrError findSymbol(const Utils::FileName &filePath, const QString &symbol);
+    QStringOrError typeInfo(const Utils::FileName &filePath, int line, int col);
 
-    Utils::optional<QByteArray> runQuery(const QString &query);
+    QByteArrayOrError runQuery(const QString &query);
 
-    Utils::optional<QByteArray> runFindSymbol(const Utils::FileName &filePath, const QString &symbol);
-    Utils::optional<QByteArray> runTypeInfo(const Utils::FileName &filePath, int line, int col);
+    QByteArrayOrError runFindSymbol(const Utils::FileName &filePath, const QString &symbol);
+    QByteArrayOrError runTypeInfo(const Utils::FileName &filePath, int line, int col);
 
-    static Utils::optional<SymbolInfo> parseFindSymbol(const Utils::optional<QByteArray> &response);
-    static Utils::optional<QString> parseTypeInfo(const Utils::optional<QByteArray> &response);
+    static SymbolInfoOrError parseFindSymbol(const QByteArrayOrError &response);
+    static QStringOrError parseTypeInfo(const QByteArrayOrError &response);
 
    static void setStackExecutable(const Utils::FileName &filePath);
 
 private:
-    bool ensureStarted();
+    Utils::optional<Error> ensureStarted();
     void shutdown();
     void log(const QString &message);
 
@@ -104,9 +119,9 @@ class AsyncGhcMod : public QObject
 public:
     struct Operation {
         Operation() = default;
-        Operation(const std::function<Utils::optional<QByteArray>()> &op);
-        mutable QFutureInterface<Utils::optional<QByteArray>> fi;
-        std::function<Utils::optional<QByteArray>()> op;
+        Operation(const std::function<QByteArrayOrError()> &op);
+        mutable QFutureInterface<QByteArrayOrError> fi;
+        std::function<QByteArrayOrError()> op;
     };
 
     AsyncGhcMod(const Utils::FileName &path);
@@ -114,9 +129,8 @@ public:
 
     Utils::FileName basePath() const;
 
-    QFuture<Utils::optional<SymbolInfo>> findSymbol(const Utils::FileName &filePath,
-                                                    const QString &symbol);
-    QFuture<Utils::optional<QString>> typeInfo(const Utils::FileName &filePath, int line, int col);
+    QFuture<SymbolInfoOrError> findSymbol(const Utils::FileName &filePath, const QString &symbol);
+    QFuture<QStringOrError> typeInfo(const Utils::FileName &filePath, int line, int col);
 
 private slots:
     void updateCache(); // called through QMetaObject::invokeMethod

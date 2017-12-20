@@ -88,12 +88,12 @@ static QString toUnicode(QByteArray data)
     return QString::fromUtf8(data);
 }
 
-Utils::optional<SymbolInfo> GhcMod::findSymbol(const FileName &filePath, const QString &symbol)
+SymbolInfoOrError GhcMod::findSymbol(const FileName &filePath, const QString &symbol)
 {
     return parseFindSymbol(runFindSymbol(filePath, symbol));
 }
 
-Utils::optional<QString> GhcMod::typeInfo(const FileName &filePath, int line, int col)
+QStringOrError GhcMod::typeInfo(const FileName &filePath, int line, int col)
 {
     return parseTypeInfo(runTypeInfo(filePath, line, col));
 }
@@ -107,7 +107,7 @@ static QStringList fileMapArgs(const QHash<FileName, FileName> &map)
     return result;
 }
 
-bool GhcMod::ensureStarted()
+Utils::optional<Error> GhcMod::ensureStarted()
 {
     m_mutex.lock();
     const FileName plainStackExecutable = m_stackExecutable;
@@ -117,7 +117,7 @@ bool GhcMod::ensureStarted()
     if (m_process && FileName::fromString(m_process->program()) != stackExecutable)
         shutdown();
     if (m_process)
-        return true;
+        return Utils::nullopt;
     log("starting");
     // for ghc-mod finding stack back:
     env.prependOrSetPath(stackExecutable.toFileInfo().absolutePath());
@@ -129,11 +129,12 @@ bool GhcMod::ensureStarted()
                      << "legacy-interactive");
     if (!m_process->waitForStarted(kTimeoutMS)) {
         log("failed to start");
-        return false;
+        m_process.reset();
+        return Error({Error::Type::FailedToStartStack, plainStackExecutable.toUserOutput()});
     }
     log("started");
     m_process->setReadChannel(QProcess::StandardOutput);
-    return true;
+    return Utils::nullopt;
 }
 
 void GhcMod::shutdown()
@@ -152,10 +153,11 @@ void GhcMod::log(const QString &message)
     qCDebug(ghcModLog) << "ghcmod for" << m_path.toString() << ":" << qPrintable(message);
 }
 
-Utils::optional<QByteArray> GhcMod::runQuery(const QString &query)
+QByteArrayOrError GhcMod::runQuery(const QString &query)
 {
-    if (!ensureStarted())
-        return Utils::nullopt;
+    const Utils::optional<Error> error = ensureStarted();
+    if (error)
+        return error.value();
     log("query \"" + query + "\"");
     m_process->write(query.toUtf8() + "\n");
     bool ok = false;
@@ -172,7 +174,7 @@ Utils::optional<QByteArray> GhcMod::runQuery(const QString &query)
     if (!ok) {
         log("failed");
         m_process.reset();
-        return Utils::nullopt;
+        return Error({Error::Type::Other, QString()});
     }
     log("success");
     // convert to unix line endings
@@ -181,27 +183,28 @@ Utils::optional<QByteArray> GhcMod::runQuery(const QString &query)
     return response;
 }
 
-Utils::optional<QByteArray> GhcMod::runFindSymbol(const FileName &filePath, const QString &symbol)
+QByteArrayOrError GhcMod::runFindSymbol(const FileName &filePath, const QString &symbol)
 {
     return runQuery(QString("info %1 %2").arg(filePath.toString()) // TODO toNative? quoting?
                     .arg(symbol));
 }
 
-Utils::optional<QByteArray> GhcMod::runTypeInfo(const FileName &filePath, int line, int col)
+QByteArrayOrError GhcMod::runTypeInfo(const FileName &filePath, int line, int col)
 {
     return runQuery(QString("type %1 %2 %3").arg(filePath.toString()) // TODO toNative? quoting?
                     .arg(line)
                     .arg(col + 1));
 }
 
-Utils::optional<SymbolInfo> GhcMod::parseFindSymbol(const Utils::optional<QByteArray> &response)
+SymbolInfoOrError GhcMod::parseFindSymbol(const QByteArrayOrError &response)
 {
     QRegularExpression infoRegEx("^\\s*(.*?)\\s+--\\sDefined ((at (.+?)(:(\\d+):(\\d+))?)|(in ‘(.+)’.*))$");
-    if (!response)
-        return Utils::nullopt;
+    const QByteArray *bytes = Utils::get_if<QByteArray>(&response);
+    if (!bytes)
+        return Utils::get<Error>(response);
     SymbolInfo info;
     bool hasFileOrModule = false;
-    const QString str = toUnicode(QByteArray(response.value()).replace('\x0', '\n'));
+    const QString str = toUnicode(QByteArray(*bytes).replace('\x0', '\n'));
     for (const QString &line : str.split('\n')) {
         if (hasFileOrModule) {
             info.additionalInfo += line;
@@ -229,19 +232,20 @@ Utils::optional<SymbolInfo> GhcMod::parseFindSymbol(const Utils::optional<QByteA
     }
     if (hasFileOrModule)
         return info;
-    return Utils::nullopt;
+    return Error({Error::Type::Other, QString()});
 }
 
-Utils::optional<QString> GhcMod::parseTypeInfo(const Utils::optional<QByteArray> &response)
+QStringOrError GhcMod::parseTypeInfo(const QByteArrayOrError &response)
 {
     QRegularExpression typeRegEx("^\\d+\\s+\\d+\\s+\\d+\\s+\\d+\\s+\"(.*)\"$",
                                  QRegularExpression::MultilineOption);
-    if (!response)
-        return Utils::nullopt;
-    QRegularExpressionMatch result = typeRegEx.match(toUnicode(response.value()));
+    const QByteArray *bytes = Utils::get_if<QByteArray>(&response);
+    if (!bytes)
+        return Utils::get<Error>(response);
+    QRegularExpressionMatch result = typeRegEx.match(toUnicode(*bytes));
     if (result.hasMatch())
         return result.captured(1);
-    return Utils::nullopt;
+    return Error({Error::Type::Other, QString()});
 }
 
 void GhcMod::setStackExecutable(const FileName &filePath)
@@ -285,13 +289,13 @@ FileName AsyncGhcMod::basePath() const
 
 template <typename Result>
 QFuture<Result> createFuture(AsyncGhcMod::Operation op,
-                             const std::function<Result(const Utils::optional<QByteArray>&)> &postOp)
+                             const std::function<Result(const QByteArrayOrError &)> &postOp)
 {
     auto fi = new QFutureInterface<Result>;
     fi->reportStarted();
 
     // propagate inner events to outside future
-    auto opWatcher = new QFutureWatcher<Utils::optional<QByteArray>>();
+    auto opWatcher = new QFutureWatcher<QByteArrayOrError>();
     QObject::connect(opWatcher, &QFutureWatcherBase::canceled, [fi] { fi->cancel(); });
     QObject::connect(opWatcher, &QFutureWatcherBase::finished, opWatcher, &QObject::deleteLater);
     QObject::connect(opWatcher, &QFutureWatcherBase::finished, [fi] {
@@ -319,14 +323,14 @@ QFuture<Result> createFuture(AsyncGhcMod::Operation op,
     Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
     while waiting for it to finish - doing so will result in a deadlock.
 */
-QFuture<Utils::optional<SymbolInfo>> AsyncGhcMod::findSymbol(const FileName &filePath,
+QFuture<SymbolInfoOrError> AsyncGhcMod::findSymbol(const FileName &filePath,
                                                              const QString &symbol)
 {
     QMutexLocker lock(&m_mutex);
     Operation op([this, filePath, symbol] { return m_ghcmod.runFindSymbol(filePath, symbol); });
     m_queue.append(op);
     QTimer::singleShot(0, &m_threadTarget, [this] { reduceQueue(); });
-    return createFuture<Utils::optional<SymbolInfo>>(op, &GhcMod::parseFindSymbol);
+    return createFuture<SymbolInfoOrError>(op, &GhcMod::parseFindSymbol);
 }
 
 /*!
@@ -335,13 +339,13 @@ QFuture<Utils::optional<SymbolInfo>> AsyncGhcMod::findSymbol(const FileName &fil
     Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
     while waiting for it to finish - doing so will result in a deadlock.
 */
-QFuture<Utils::optional<QString>> AsyncGhcMod::typeInfo(const FileName &filePath, int line, int col)
+QFuture<QStringOrError> AsyncGhcMod::typeInfo(const FileName &filePath, int line, int col)
 {
     QMutexLocker lock(&m_mutex);
     Operation op([this, filePath, line, col] { return m_ghcmod.runTypeInfo(filePath, line, col); });
     m_queue.append(op);
     QTimer::singleShot(0, &m_threadTarget, [this] { reduceQueue(); });
-    return createFuture<Utils::optional<QString>>(op, &GhcMod::parseTypeInfo);
+    return createFuture<QStringOrError>(op, &GhcMod::parseTypeInfo);
 }
 
 /*!
@@ -380,14 +384,14 @@ void AsyncGhcMod::reduceQueue()
         if (!op.fi.isCanceled()) {
             QMetaObject::invokeMethod(this, "updateCache", Qt::BlockingQueuedConnection);
             m_ghcmod.setFileMap(m_fileCache.fileMap());
-            Utils::optional<QByteArray> result = op.op();
+            QByteArrayOrError result = op.op();
             op.fi.reportResult(result);
         }
         op.fi.reportFinished();
     }
 }
 
-AsyncGhcMod::Operation::Operation(const std::function<Utils::optional<QByteArray>()> &op)
+AsyncGhcMod::Operation::Operation(const std::function<QByteArrayOrError()> &op)
     : op(op)
 {
     fi.reportStarted();

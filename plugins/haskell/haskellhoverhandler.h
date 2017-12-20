@@ -47,8 +47,8 @@ private:
     int m_col = -1;
     QString m_name;
 
-    QFuture<Utils::optional<SymbolInfo>> m_symbolFuture;
-    QFuture<Utils::optional<QString>> m_typeFuture;
+    QFuture<SymbolInfoOrError> m_symbolFuture;
+    QFuture<QStringOrError> m_typeFuture;
 };
 
 } // namespace Internal

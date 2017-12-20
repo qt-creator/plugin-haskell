@@ -88,28 +88,30 @@ IAssistProposal *FollowSymbolAssistProcessor::perform(const AssistInterface *int
 {
     const int position = interface->position();
     delete interface;
-    const optional<SymbolInfo> info = m_symbolFuture.result();
+    const SymbolInfoOrError info = m_symbolFuture.result();
     auto item = new FollowSymbolAssistProposalItem(m_ghcmod->basePath(), info, m_inNextSplit);
     return new InstantProposal(position, {item});
 }
 
 FollowSymbolAssistProposalItem::FollowSymbolAssistProposalItem(const FileName &basePath,
-                                                               const optional<SymbolInfo> &info,
+                                                               const SymbolInfoOrError &info,
                                                                bool inNextSplit)
     : m_basePath(basePath),
       m_inNextSplit(inNextSplit)
 {
-    if (info && !info->file.isEmpty()) {
+    const SymbolInfo *info_p = Utils::get_if<SymbolInfo>(&info);
+    if (info_p && !info_p->file.isEmpty()) {
         m_info = info;
-        setText(m_basePath.toString() + '/' + m_info->file.toString());
+        setText(m_basePath.toString() + '/' + info_p->file.toString());
     }
 }
 
 void FollowSymbolAssistProposalItem::apply(TextDocumentManipulatorInterface &, int) const
 {
-    if (m_info)
-        Core::EditorManager::openEditorAt(m_basePath.toString() + '/' + m_info->file.toString(),
-                                          m_info->line, m_info->col - 1, Core::Id(),
+    const SymbolInfo *info_p = Utils::get_if<SymbolInfo>(&m_info);
+    if (info_p)
+        Core::EditorManager::openEditorAt(m_basePath.toString() + '/' + info_p->file.toString(),
+                                          info_p->line, info_p->col - 1, Core::Id(),
                                           m_inNextSplit ? Core::EditorManager::OpenInOtherSplit
                                                         : Core::EditorManager::NoFlags);
 }

@@ -40,14 +40,14 @@ class FollowSymbolAssistProposalItem : public TextEditor::AssistProposalItem
 {
 public:
     FollowSymbolAssistProposalItem(const Utils::FileName &basePath,
-                                   const Utils::optional<SymbolInfo> &info,
+                                   const SymbolInfoOrError &info,
                                    bool inNextSplit);
 
     void apply(TextEditor::TextDocumentManipulatorInterface &, int) const override;
 
 private:
     Utils::FileName m_basePath;
-    Utils::optional<SymbolInfo> m_info;
+    SymbolInfoOrError m_info;
     bool m_inNextSplit;
 };
 
@@ -86,7 +86,7 @@ public:
 
 private:
     std::shared_ptr<AsyncGhcMod> m_ghcmod;
-    QFuture<Utils::optional<SymbolInfo>> m_symbolFuture;
+    QFuture<SymbolInfoOrError> m_symbolFuture;
     bool m_inNextSplit;
 };
 
