@@ -47,7 +47,7 @@ namespace Internal {
 HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
 {
     registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
-    setSupportedProjectType<HaskellProject>();
+    addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     setSupportedTargetDeviceTypes({ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE});
 }
 
