@@ -34,6 +34,7 @@ const char C_HASKELL_PROJECT_MIMETYPE[] = "text/x-haskell-project";
 const char C_HASKELL_RUNCONFIG_ID_PREFIX[] = "Haskell.Run.";
 const char C_HASKELL_PROJECT_ID[] = "Haskell.Project";
 const char C_HASKELL_EXECUTABLE_KEY[] = "Haskell.Executable";
+const char OPTIONS_GENERAL[] = "Haskell.A.General";
 
 } // namespace Haskell
 } // namespace Constants

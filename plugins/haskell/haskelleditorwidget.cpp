@@ -25,11 +25,16 @@
 
 #include "haskelleditorwidget.h"
 
+#include "haskellconstants.h"
 #include "haskelltokenizer.h"
 
+#include <coreplugin/icore.h>
+#include <coreplugin/infobar.h>
+#include <texteditor/textdocument.h>
 #include <utils/textutils.h>
 
 #include <QTextBlock>
+#include <QTimer>
 
 using namespace TextEditor;
 
@@ -61,6 +66,26 @@ Utils::optional<Token> HaskellEditorWidget::symbolAt(QTextDocument *doc, int pos
         return token;
     }
     return Utils::nullopt;
+}
+
+void HaskellEditorWidget::showFailedToStartStackError(const QString &stackExecutable,
+                                                      TextEditorWidget *widget)
+{
+    static const char id[] = "Haskell.FailedToStartStack";
+    Core::IDocument *document = widget->textDocument();
+    if (!document->infoBar()->containsInfo(id)) {
+        Core::InfoBarEntry info(
+            id,
+            tr("Failed to start Haskell Stack \"%1\". Make sure you have stack installed and configured in the options.")
+                .arg(stackExecutable));
+        info.setCustomButtonInfo(Core::ICore::msgShowOptionsDialog(), [document] {
+            QTimer::singleShot(0, Core::ICore::instance(), [document] {
+                document->infoBar()->removeInfo(id);
+                Core::ICore::showOptionsDialog(Constants::OPTIONS_GENERAL);
+            });
+        });
+        document->infoBar()->addInfo(info);
+    }
 }
 
 Utils::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,

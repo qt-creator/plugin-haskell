@@ -25,6 +25,7 @@
 
 #include "optionspage.h"
 
+#include "haskellconstants.h"
 #include "haskellmanager.h"
 
 #include <QGroupBox>
@@ -38,7 +39,7 @@ namespace Internal {
 
 OptionsPage::OptionsPage()
 {
-    setId("A.General");
+    setId(Constants::OPTIONS_GENERAL);
     setDisplayName(tr("General"));
     setCategory("J.Z.Haskell");
     setDisplayCategory(tr("Haskell"));

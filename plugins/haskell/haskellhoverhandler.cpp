@@ -86,7 +86,19 @@ void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidg
     }
 }
 
-static void tryShowToolTip(const QPointer<QWidget> &widget, const QPoint &point,
+static void showError(const QPointer<TextEditor::TextEditorWidget> &widget,
+                      const Error &typeError, const Error &infoError)
+{
+    if (typeError.type == Error::Type::FailedToStartStack
+            || infoError.type == Error::Type::FailedToStartStack) {
+        const QString stackExecutable = typeError.type == Error::Type::FailedToStartStack
+                                            ? typeError.details
+                                            : infoError.details;
+        HaskellEditorWidget::showFailedToStartStackError(stackExecutable, widget);
+    }
+}
+
+static void tryShowToolTip(const QPointer<TextEditor::TextEditorWidget> &widget, const QPoint &point,
                            QFuture<QStringOrError> typeFuture,
                            QFuture<SymbolInfoOrError> symbolFuture)
 {
@@ -94,6 +106,9 @@ static void tryShowToolTip(const QPointer<QWidget> &widget, const QPoint &point,
             && symbolFuture.isResultReadyAt(0) && typeFuture.isResultReadyAt(0)) {
         const QStringOrError typeOrError = typeFuture.result();
         const SymbolInfoOrError infoOrError = symbolFuture.result();
+        if (const Error *typeError = Utils::get_if<Error>(&typeOrError))
+            if (const Error *infoError = Utils::get_if<Error>(&infoOrError))
+                showError(widget, *typeError, *infoError);
         const QString *type = Utils::get_if<QString>(&typeOrError);
         const SymbolInfo *info = Utils::get_if<SymbolInfo>(&infoOrError);
         const QString typeString = !type || type->isEmpty()
@@ -115,7 +130,7 @@ void HaskellHoverHandler::operateTooltip(TextEditor::TextEditorWidget *editorWid
     }
     Utils::ToolTip::show(point, HaskellManager::trLookingUp(m_name), editorWidget);
 
-    QPointer<QWidget> widget = editorWidget;
+    QPointer<TextEditor::TextEditorWidget> widget = editorWidget;
     std::shared_ptr<AsyncGhcMod> ghcmod;
     auto doc = qobject_cast<HaskellDocument *>(editorWidget->textDocument());
     QTC_ASSERT(doc, return);

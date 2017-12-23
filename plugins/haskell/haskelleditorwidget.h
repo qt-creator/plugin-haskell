@@ -43,6 +43,9 @@ public:
     static Utils::optional<Token> symbolAt(QTextDocument *doc, int position,
                                            int *line, int *column);
 
+    static void showFailedToStartStackError(const QString &stackExecutable,
+                                            TextEditor::TextEditorWidget *widget);
+
 protected:
     Utils::Link findLinkAt(const QTextCursor &cursor, bool resolveTarget = true,
                            bool inNextSplit = false) override;
