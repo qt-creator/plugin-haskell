@@ -114,8 +114,15 @@ Utils::optional<Error> GhcMod::ensureStarted()
     m_mutex.unlock();
     Environment env = Environment::systemEnvironment();
     const FileName stackExecutable = env.searchInPath(plainStackExecutable.toString());
-    if (m_process && FileName::fromString(m_process->program()) != stackExecutable)
-        shutdown();
+    if (m_process) {
+        if (m_process->state() == QProcess::NotRunning) {
+            log("is no longer running");
+            m_process.reset();
+        } else if (FileName::fromString(m_process->program()) != stackExecutable) {
+            log("stack settings changed");
+            shutdown();
+        }
+    }
     if (m_process)
         return Utils::nullopt;
     log("starting");
@@ -173,7 +180,7 @@ QByteArrayOrError GhcMod::runQuery(const QString &query)
         qCDebug(ghcModLog) << "response" << QTextCodec::codecForLocale()->toUnicode(response);
     if (!ok) {
         log("failed");
-        m_process.reset();
+        shutdown();
         return Error({Error::Type::Other, QString()});
     }
     log("success");
