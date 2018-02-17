@@ -70,7 +70,9 @@ QString symbolToHtml(const SymbolInfo &info)
     return result;
 }
 
-void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidget, int pos)
+void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidget,
+                                        int pos,
+                                        ReportPriority report)
 {
     cancel();
     m_name.clear();
@@ -84,6 +86,7 @@ void HaskellHoverHandler::identifyMatch(TextEditor::TextEditorWidget *editorWidg
     } else {
         setPriority(-1);
     }
+    report(priority());
 }
 
 static void showError(const QPointer<TextEditor::TextEditorWidget> &widget,

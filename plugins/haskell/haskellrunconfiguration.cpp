@@ -51,12 +51,16 @@ HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
     setSupportedTargetDeviceTypes({ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE});
 }
 
-QList<QString> HaskellRunConfigurationFactory::availableBuildTargets(
+QList<BuildTargetInfo> HaskellRunConfigurationFactory::availableBuildTargets(
     Target *parent, IRunConfigurationFactory::CreationMode mode) const
 {
     Q_UNUSED(mode)
     const auto project = HaskellProject::toHaskellProject(parent->project());
-    return project ? project->availableExecutables() : QList<QString>();
+    if (!project)
+        return {};
+    return Utils::transform(project->availableExecutables(), [](const QString &name) {
+        return BuildTargetInfo(name, Utils::FileName(), Utils::FileName());
+    });
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)

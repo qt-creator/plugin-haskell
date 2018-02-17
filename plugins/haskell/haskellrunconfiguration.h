@@ -37,8 +37,8 @@ class HaskellRunConfigurationFactory : public ProjectExplorer::IRunConfiguration
 public:
     HaskellRunConfigurationFactory();
 
-    QList<QString> availableBuildTargets(ProjectExplorer::Target *parent,
-                                         CreationMode mode) const override;
+    QList<ProjectExplorer::BuildTargetInfo> availableBuildTargets(ProjectExplorer::Target *parent,
+                                                                  CreationMode mode) const override;
 };
 
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
