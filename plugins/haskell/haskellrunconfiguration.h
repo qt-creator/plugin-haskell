@@ -43,6 +43,8 @@ class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
 public:
     HaskellRunConfiguration(ProjectExplorer::Target *parent);
 
+    QString extraId() const final;
+
 private:
     QWidget *createConfigurationWidget() final;
     ProjectExplorer::Runnable runnable() const final;

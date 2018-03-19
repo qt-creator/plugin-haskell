@@ -65,6 +65,13 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)
     addExtraAspect(environmentAspect);
 }
 
+QString HaskellRunConfiguration::extraId() const
+{
+    // must be the RunConfigurationCreationInfo.targetName or .buildKey
+    // (for Target::updateDefaultRunConfigurations())
+    return m_executable;
+}
+
 QWidget *HaskellRunConfiguration::createConfigurationWidget()
 {
     auto details = new Utils::DetailsWidget;
