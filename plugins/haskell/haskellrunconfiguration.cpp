@@ -46,13 +46,13 @@ namespace Internal {
 
 HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
 {
-    registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID_PREFIX);
+    registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID);
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)
-    : RunConfiguration(parent, Constants::C_HASKELL_RUNCONFIG_ID_PREFIX)
+    : RunConfiguration(parent, Constants::C_HASKELL_RUNCONFIG_ID)
 {
     auto argumentAspect = new ArgumentsAspect(this, "Haskell.RunAspect.Arguments");
     auto workingDirAspect = new WorkingDirectoryAspect(this, "Haskell.RunAspect.WorkingDirectory");

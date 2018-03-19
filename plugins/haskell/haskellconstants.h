@@ -31,7 +31,7 @@ namespace Constants {
 const char C_HASKELLEDITOR_ID[] = "Haskell.HaskellEditor";
 const char C_HASKELLSNIPPETSGROUP_ID[] = "Haskell";
 const char C_HASKELL_PROJECT_MIMETYPE[] = "text/x-haskell-project";
-const char C_HASKELL_RUNCONFIG_ID_PREFIX[] = "Haskell.Run.";
+const char C_HASKELL_RUNCONFIG_ID[] = "Haskell.RunConfiguration";
 const char C_HASKELL_PROJECT_ID[] = "Haskell.Project";
 const char C_HASKELL_EXECUTABLE_KEY[] = "Haskell.Executable";
 const char OPTIONS_GENERAL[] = "Haskell.A.General";
