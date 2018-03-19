@@ -49,6 +49,7 @@ public:
 private:
     void updateFiles();
     void updateApplicationTargets(ProjectExplorer::Target *target);
+    void refresh();
 };
 
 } // namespace Internal

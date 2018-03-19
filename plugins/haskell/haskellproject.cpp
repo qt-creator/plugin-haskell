@@ -70,7 +70,7 @@ HaskellProjectNode::HaskellProjectNode(const FileName &projectFilePath, Core::Id
 {}
 
 HaskellProject::HaskellProject(const Utils::FileName &fileName)
-    : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName)
+    : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName, [this] { refresh(); })
 {
     setId(Constants::C_HASKELL_PROJECT_ID);
     setDisplayName(fileName.toFileInfo().completeBaseName());
@@ -128,6 +128,13 @@ void HaskellProject::updateApplicationTargets(Target *target)
     list.list = appTargets;
     target->setApplicationTargets(list);
     target->updateDefaultRunConfigurations();
+}
+
+void HaskellProject::refresh()
+{
+    updateFiles();
+    if (activeTarget())
+        updateApplicationTargets(activeTarget());
 }
 
 } // namespace Internal
