@@ -35,7 +35,6 @@
 #include <projectexplorer/runconfigurationaspects.h>
 #include <projectexplorer/runnables.h>
 #include <projectexplorer/target.h>
-#include <utils/detailswidget.h>
 
 #include <QFormLayout>
 
@@ -74,16 +73,13 @@ QString HaskellRunConfiguration::extraId() const
 
 QWidget *HaskellRunConfiguration::createConfigurationWidget()
 {
-    auto details = new Utils::DetailsWidget;
-    details->setState(Utils::DetailsWidget::NoSummary);
     auto widget = new QWidget;
-    details->setWidget(widget);
     auto layout = new QFormLayout(widget);
     layout->setMargin(0);
     layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
     extraAspect<ArgumentsAspect>()->addToMainConfigurationWidget(widget, layout);
     extraAspect<TerminalAspect>()->addToMainConfigurationWidget(widget, layout);
-    return details;
+    return wrapWidget(widget);
 }
 
 Runnable HaskellRunConfiguration::runnable() const
