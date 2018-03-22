@@ -88,9 +88,12 @@ void HaskellEditorWidget::showFailedToStartStackError(const QString &stackExecut
     }
 }
 
-Utils::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,
-                                            bool resolveTarget, bool inNextSplit)
+void HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,
+                                     Utils::ProcessLinkCallback &&processLinkCallback,
+                                     bool resolveTarget,
+                                     bool inNextSplit)
 {
+    Utils::Link link;
     int line, column;
     const Utils::optional<Token> symbol = symbolAt(document(), cursor.position(), &line, &column);
     if (symbol) {
@@ -102,9 +105,8 @@ Utils::Link HaskellEditorWidget::findLinkAt(const QTextCursor &cursor,
             m_followSymbolAssistProvider.setOpenInNextSplit(inNextSplit);
             invokeAssist(FollowSymbol, &m_followSymbolAssistProvider);
         }
-        return link;
     }
-    return Utils::Link();
+    processLinkCallback(link);
 }
 
 } // namespace Internal

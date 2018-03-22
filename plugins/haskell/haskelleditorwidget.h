@@ -47,8 +47,10 @@ public:
                                             TextEditor::TextEditorWidget *widget);
 
 protected:
-    Utils::Link findLinkAt(const QTextCursor &cursor, bool resolveTarget = true,
-                           bool inNextSplit = false) override;
+    void findLinkAt(const QTextCursor &cursor,
+                    Utils::ProcessLinkCallback &&processLinkCallback,
+                    bool resolveTarget = true,
+                    bool inNextSplit = false) override;
 
 private:
     FollowSymbolAssistProvider m_followSymbolAssistProvider;
