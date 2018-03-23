@@ -29,6 +29,7 @@
 
 #include <projectexplorer/buildconfiguration.h>
 #include <projectexplorer/project.h>
+#include <projectexplorer/projectexplorerconstants.h>
 
 using namespace ProjectExplorer;
 
@@ -79,6 +80,7 @@ StackBuildStepFactory::StackBuildStepFactory()
 {
     registerStep<StackBuildStep>(C_STACK_BUILD_STEP_ID);
     setDisplayName(StackBuildStep::StackBuildStep::trDisplayName());
+    setSupportedStepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
 }
 
 } // namespace Internal
