@@ -116,7 +116,6 @@ void HaskellProject::updateApplicationTargets(Target *target)
     const QList<BuildTargetInfo> appTargets
         = Utils::transform<QList>(executables, [projFilePath](const QString &executable) {
               BuildTargetInfo bti;
-              bti.targetName = executable;
               bti.displayName = executable;
               bti.buildKey = executable;
               bti.targetFilePath = FileName::fromString(executable);

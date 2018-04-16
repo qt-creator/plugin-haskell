@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <projectexplorer/runconfiguration.h>
+#include <projectexplorer/runconfigurationaspects.h>
 
 namespace Haskell {
 namespace Internal {
@@ -36,25 +36,26 @@ public:
     HaskellRunConfigurationFactory();
 };
 
+class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
+{
+    Q_OBJECT
+
+public:
+    HaskellExecutableAspect(ProjectExplorer::RunConfiguration *rc);
+    void update();
+};
+
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
 {
     Q_OBJECT
 
 public:
-    HaskellRunConfiguration(ProjectExplorer::Target *parent);
-
-    QString extraId() const final;
+    HaskellRunConfiguration(ProjectExplorer::Target *target, Core::Id id);
 
 private:
-    QWidget *createConfigurationWidget() final;
-    ProjectExplorer::Runnable runnable() const final;
-    void handleBuildSystemDataUpdated();
-
-    bool fromMap(const QVariantMap &map) final;
-    QVariantMap toMap() const final;
+    void fillConfigurationLayout(QFormLayout *layout) const final;
     void doAdditionalSetup(const ProjectExplorer::RunConfigurationCreationInfo &info) final;
-
-    QString m_executable;
+    ProjectExplorer::Runnable runnable() const final;
 };
 
 } // namespace Internal

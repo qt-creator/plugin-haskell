@@ -36,8 +36,6 @@
 #include <projectexplorer/runnables.h>
 #include <projectexplorer/target.h>
 
-#include <QFormLayout>
-
 using namespace ProjectExplorer;
 
 namespace Haskell {
@@ -45,41 +43,48 @@ namespace Internal {
 
 HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
 {
-    registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID);
+    registerRunConfiguration<HaskellRunConfiguration>("Haskell.RunConfiguration");
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
 }
 
-HaskellRunConfiguration::HaskellRunConfiguration(Target *parent)
-    : RunConfiguration(parent, Constants::C_HASKELL_RUNCONFIG_ID)
+HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
+    : BaseStringAspect(rc)
 {
-    auto argumentAspect = new ArgumentsAspect(this, "Haskell.RunAspect.Arguments");
+    setSettingsKey("Haskell.Executable");
+    setLabelText(tr("Executable"));
+    connect(rc->target(), &Target::applicationTargetsChanged,
+            this, &HaskellExecutableAspect::update);
+}
+
+void HaskellExecutableAspect::update()
+{
+    RunConfiguration *rc = runConfiguration();
+    BuildTargetInfo bti = rc->target()->applicationTargets().buildTargetInfo(rc->buildKey());
+    setValue(bti.targetFilePath.toString());
+}
+
+HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
+    : RunConfiguration(target, id)
+{
+    addExtraAspect(new HaskellExecutableAspect(this));
+    addExtraAspect(new ArgumentsAspect(this, "Haskell.RunAspect.Arguments"));
     auto workingDirAspect = new WorkingDirectoryAspect(this, "Haskell.RunAspect.WorkingDirectory");
-    workingDirAspect->setDefaultWorkingDirectory(parent->project()->projectDirectory());
-    auto terminalAspect = new TerminalAspect(this, "Haskell.RunAspect.Terminal");
-    auto environmentAspect
-        = new LocalEnvironmentAspect(this, LocalEnvironmentAspect::BaseEnvironmentModifier());
-    addExtraAspect(argumentAspect);
-    addExtraAspect(terminalAspect);
-    addExtraAspect(environmentAspect);
+    workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
+    addExtraAspect(new TerminalAspect(this, "Haskell.RunAspect.Terminal"));
+    addExtraAspect(new LocalEnvironmentAspect(this, LocalEnvironmentAspect::BaseEnvironmentModifier()));
 }
 
-QString HaskellRunConfiguration::extraId() const
+void HaskellRunConfiguration::fillConfigurationLayout(QFormLayout *layout) const
 {
-    // must be the RunConfigurationCreationInfo.targetName or .buildKey
-    // (for Target::updateDefaultRunConfigurations())
-    return m_executable;
+    extraAspect<HaskellExecutableAspect>()->addToConfigurationLayout(layout);
+    extraAspect<ArgumentsAspect>()->addToConfigurationLayout(layout);
+    extraAspect<TerminalAspect>()->addToConfigurationLayout(layout);
 }
 
-QWidget *HaskellRunConfiguration::createConfigurationWidget()
+void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
 {
-    auto widget = new QWidget;
-    auto layout = new QFormLayout(widget);
-    layout->setMargin(0);
-    layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-    extraAspect<ArgumentsAspect>()->addToMainConfigurationWidget(widget, layout);
-    extraAspect<TerminalAspect>()->addToMainConfigurationWidget(widget, layout);
-    return wrapWidget(widget);
+    extraAspect<HaskellExecutableAspect>()->setValue(info.buildKey);
 }
 
 Runnable HaskellRunConfiguration::runnable() const
@@ -92,7 +97,8 @@ Runnable HaskellRunConfiguration::runnable() const
                                         .relativeFilePath(
                                             buildConfiguration->buildDirectory().toString())
                                   + "\" ";
-    r.commandLineArguments += "exec \"" + m_executable + "\"";
+    QString executable = extraAspect<HaskellExecutableAspect>()->value();
+    r.commandLineArguments += "exec \"" + executable + "\"";
     auto argumentsAspect = extraAspect<ArgumentsAspect>();
     if (!argumentsAspect->arguments().isEmpty())
         r.commandLineArguments += " -- " + argumentsAspect->arguments();
@@ -101,28 +107,6 @@ Runnable HaskellRunConfiguration::runnable() const
     r.environment = extraAspect<LocalEnvironmentAspect>()->environment();
     r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString()).toString();
     return r;
-}
-
-bool HaskellRunConfiguration::fromMap(const QVariantMap &map)
-{
-    if (!RunConfiguration::fromMap(map))
-        return false;
-    m_executable = map.value(QString(Constants::C_HASKELL_EXECUTABLE_KEY)).toString();
-    setDefaultDisplayName(m_executable);
-    return true;
-}
-
-void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
-{
-    m_executable = info.targetName;
-    setDefaultDisplayName(m_executable);
-}
-
-QVariantMap HaskellRunConfiguration::toMap() const
-{
-    QVariantMap map = RunConfiguration::toMap();
-    map.insert(QString(Constants::C_HASKELL_EXECUTABLE_KEY), m_executable);
-    return map;
 }
 
 } // namespace Internal
