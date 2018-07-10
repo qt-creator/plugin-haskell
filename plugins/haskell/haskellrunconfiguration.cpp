@@ -33,7 +33,6 @@
 #include <projectexplorer/localenvironmentaspect.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/runconfigurationaspects.h>
-#include <projectexplorer/runnables.h>
 #include <projectexplorer/target.h>
 
 using namespace ProjectExplorer;
@@ -90,7 +89,7 @@ void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationIn
 Runnable HaskellRunConfiguration::runnable() const
 {
     const QString projectDirectory = target()->project()->projectDirectory().toString();
-    StandardRunnable r;
+    Runnable r;
     if (BuildConfiguration *buildConfiguration = target()->activeBuildConfiguration())
         r.commandLineArguments += "--work-dir \""
                                   + QDir(projectDirectory)
