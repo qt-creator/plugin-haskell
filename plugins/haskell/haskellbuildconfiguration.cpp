@@ -88,8 +88,8 @@ QList<BuildInfo *> HaskellBuildConfigurationFactory::availableSetups(
     return createInfos(this, k, Utils::FileName::fromString(projectPath));
 }
 
-HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target)
-    : BuildConfiguration(target, C_HASKELL_BUILDCONFIGURATION_ID)
+HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)
+    : BuildConfiguration(target, id)
 {}
 
 NamedWidget *HaskellBuildConfiguration::createConfigWidget()

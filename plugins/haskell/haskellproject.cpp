@@ -102,8 +102,12 @@ void HaskellProject::updateFiles()
     Utils::onResultReady(future, this, [this](const QList<FileNode *> &nodes) {
         auto root = new HaskellProjectNode(projectDirectory(), id());
         root->setDisplayName(displayName());
-        root->addNestedNodes(nodes);
-        setRootProjectNode(root);
+        std::vector<std::unique_ptr<FileNode>> nodePtrs
+            = Utils::transform<std::vector>(nodes, [](FileNode *fn) {
+                  return std::unique_ptr<FileNode>(fn);
+              });
+        root->addNestedNodes(std::move(nodePtrs));
+        setRootProjectNode(std::unique_ptr<ProjectNode>(root));
         emitParsingFinished(true);
     });
 }
