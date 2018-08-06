@@ -45,6 +45,7 @@ HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
     registerRunConfiguration<HaskellRunConfiguration>("Haskell.RunConfiguration");
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
+    addRunWorkerFactory<SimpleTargetRunner>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
 }
 
 HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
@@ -102,7 +103,6 @@ Runnable HaskellRunConfiguration::runnable() const
     if (!argumentsAspect->arguments().isEmpty())
         r.commandLineArguments += " -- " + argumentsAspect->arguments();
     r.workingDirectory = projectDirectory;
-    r.runMode = extraAspect<TerminalAspect>()->runMode();
     r.environment = extraAspect<LocalEnvironmentAspect>()->environment();
     r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString()).toString();
     return r;
