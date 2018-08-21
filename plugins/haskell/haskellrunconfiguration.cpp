@@ -68,10 +68,10 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     : RunConfiguration(target, id)
 {
     addExtraAspect(new HaskellExecutableAspect(this));
-    addExtraAspect(new ArgumentsAspect(this, "Haskell.RunAspect.Arguments"));
-    auto workingDirAspect = new WorkingDirectoryAspect(this, "Haskell.RunAspect.WorkingDirectory");
+    addExtraAspect(new ArgumentsAspect(this));
+    auto workingDirAspect = new WorkingDirectoryAspect(this);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
-    addExtraAspect(new TerminalAspect(this, "Haskell.RunAspect.Terminal"));
+    addExtraAspect(new TerminalAspect(this));
     addExtraAspect(new LocalEnvironmentAspect(this, LocalEnvironmentAspect::BaseEnvironmentModifier()));
 }
 
