@@ -53,7 +53,6 @@ public:
     HaskellRunConfiguration(ProjectExplorer::Target *target, Core::Id id);
 
 private:
-    void fillConfigurationLayout(QFormLayout *layout) const final;
     void doAdditionalSetup(const ProjectExplorer::RunConfigurationCreationInfo &info) final;
     ProjectExplorer::Runnable runnable() const final;
 };

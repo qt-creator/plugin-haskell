@@ -71,15 +71,9 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     addExtraAspect(new ArgumentsAspect(this));
     auto workingDirAspect = new WorkingDirectoryAspect(this);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
+    workingDirAspect->setVisible(false);
     addExtraAspect(new TerminalAspect(this));
     addExtraAspect(new LocalEnvironmentAspect(this, LocalEnvironmentAspect::BaseEnvironmentModifier()));
-}
-
-void HaskellRunConfiguration::fillConfigurationLayout(QFormLayout *layout) const
-{
-    extraAspect<HaskellExecutableAspect>()->addToConfigurationLayout(layout);
-    extraAspect<ArgumentsAspect>()->addToConfigurationLayout(layout);
-    extraAspect<TerminalAspect>()->addToConfigurationLayout(layout);
 }
 
 void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
