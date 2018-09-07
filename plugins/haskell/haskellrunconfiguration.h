@@ -42,7 +42,6 @@ class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
 
 public:
     HaskellExecutableAspect(ProjectExplorer::RunConfiguration *rc);
-    void update();
 };
 
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration

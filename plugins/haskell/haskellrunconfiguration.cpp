@@ -53,25 +53,23 @@ HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
 {
     setSettingsKey("Haskell.Executable");
     setLabelText(tr("Executable"));
-    connect(rc->target(), &Target::applicationTargetsChanged,
-            this, &HaskellExecutableAspect::update);
-}
-
-void HaskellExecutableAspect::update()
-{
-    RunConfiguration *rc = runConfiguration();
-    BuildTargetInfo bti = rc->target()->applicationTargets().buildTargetInfo(rc->buildKey());
-    setValue(bti.targetFilePath.toString());
 }
 
 HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     : RunConfiguration(target, id)
 {
-    addAspect<HaskellExecutableAspect>();
+    auto executableAspect = addAspect<HaskellExecutableAspect>();
+    connect(target, &Target::applicationTargetsChanged, this, [this, target, executableAspect] {
+        BuildTargetInfo bti = target->applicationTargets().buildTargetInfo(buildKey());
+        executableAspect->setValue(bti.targetFilePath.toString());
+    });
+
     addAspect<ArgumentsAspect>();
+
     auto workingDirAspect = addAspect<WorkingDirectoryAspect>();
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
     workingDirAspect->setVisible(false);
+
     addAspect<TerminalAspect>();
     addAspect<LocalEnvironmentAspect>(LocalEnvironmentAspect::BaseEnvironmentModifier());
 }
