@@ -58,8 +58,8 @@ HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
 HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     : RunConfiguration(target, id)
 {
-    auto envAspect =
-        addAspect<LocalEnvironmentAspect>(LocalEnvironmentAspect::BaseEnvironmentModifier());
+    auto envAspect = addAspect<LocalEnvironmentAspect>
+            (target, LocalEnvironmentAspect::BaseEnvironmentModifier());
 
     auto executableAspect = addAspect<HaskellExecutableAspect>();
     connect(target, &Target::applicationTargetsChanged, this, [this, target, executableAspect] {
