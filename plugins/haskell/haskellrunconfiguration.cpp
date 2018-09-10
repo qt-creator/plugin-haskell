@@ -58,6 +58,9 @@ HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
 HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     : RunConfiguration(target, id)
 {
+    auto envAspect =
+        addAspect<LocalEnvironmentAspect>(LocalEnvironmentAspect::BaseEnvironmentModifier());
+
     auto executableAspect = addAspect<HaskellExecutableAspect>();
     connect(target, &Target::applicationTargetsChanged, this, [this, target, executableAspect] {
         BuildTargetInfo bti = target->applicationTargets().buildTargetInfo(buildKey());
@@ -66,12 +69,11 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
 
     addAspect<ArgumentsAspect>();
 
-    auto workingDirAspect = addAspect<WorkingDirectoryAspect>();
+    auto workingDirAspect = addAspect<WorkingDirectoryAspect>(envAspect);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
     workingDirAspect->setVisible(false);
 
     addAspect<TerminalAspect>();
-    addAspect<LocalEnvironmentAspect>(LocalEnvironmentAspect::BaseEnvironmentModifier());
 }
 
 void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
