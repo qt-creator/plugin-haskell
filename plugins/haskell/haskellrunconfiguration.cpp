@@ -91,11 +91,11 @@ Runnable HaskellRunConfiguration::runnable() const
                                         .relativeFilePath(
                                             buildConfiguration->buildDirectory().toString())
                                   + "\" ";
-    QString executable = extraAspect<HaskellExecutableAspect>()->value();
+    const QString executable = extraAspect<HaskellExecutableAspect>()->value();
     r.commandLineArguments += "exec \"" + executable + "\"";
-    auto argumentsAspect = extraAspect<ArgumentsAspect>();
-    if (!argumentsAspect->arguments().isEmpty())
-        r.commandLineArguments += " -- " + argumentsAspect->arguments();
+    const QString arguments = extraAspect<ArgumentsAspect>()->arguments(macroExpander());
+    if (!arguments.isEmpty())
+        r.commandLineArguments += " -- " + arguments;
     r.workingDirectory = projectDirectory;
     r.environment = extraAspect<LocalEnvironmentAspect>()->environment();
     r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString()).toString();
