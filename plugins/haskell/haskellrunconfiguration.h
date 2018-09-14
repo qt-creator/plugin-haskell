@@ -41,7 +41,7 @@ class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
     Q_OBJECT
 
 public:
-    HaskellExecutableAspect(ProjectExplorer::RunConfiguration *rc);
+    HaskellExecutableAspect();
 };
 
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration

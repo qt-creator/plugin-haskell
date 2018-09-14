@@ -48,8 +48,7 @@ HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
     addRunWorkerFactory<SimpleTargetRunner>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
 }
 
-HaskellExecutableAspect::HaskellExecutableAspect(RunConfiguration *rc)
-    : BaseStringAspect(rc)
+HaskellExecutableAspect::HaskellExecutableAspect()
 {
     setSettingsKey("Haskell.Executable");
     setLabelText(tr("Executable"));
