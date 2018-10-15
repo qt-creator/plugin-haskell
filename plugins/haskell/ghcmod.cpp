@@ -43,8 +43,8 @@
 
 #include <functional>
 
-Q_LOGGING_CATEGORY(ghcModLog, "qtc.haskell.ghcmod")
-Q_LOGGING_CATEGORY(asyncGhcModLog, "qtc.haskell.ghcmod.async")
+Q_LOGGING_CATEGORY(ghcModLog, "qtc.haskell.ghcmod", QtWarningMsg)
+Q_LOGGING_CATEGORY(asyncGhcModLog, "qtc.haskell.ghcmod.async", QtWarningMsg)
 
 // TODO do not hardcode
 const int kTimeoutMS = 10 * 1000;
