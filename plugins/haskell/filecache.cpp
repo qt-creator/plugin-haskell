@@ -34,7 +34,7 @@
 #include <QTemporaryFile>
 #include <QTextDocument>
 
-Q_LOGGING_CATEGORY(cacheLog, "qtc.haskell.filecache")
+Q_LOGGING_CATEGORY(cacheLog, "qtc.haskell.filecache", QtWarningMsg)
 
 using namespace Core;
 using namespace TextEditor;
