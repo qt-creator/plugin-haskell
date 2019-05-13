@@ -87,17 +87,13 @@ void HaskellProject::updateFiles()
 {
     emitParsingStarted();
     FileName projectDir = projectDirectory();
-    const QList<Core::IVersionControl *> versionControls = Core::VcsManager::versionControls();
-    QFuture<QList<FileNode *>> future = Utils::runAsync([this, projectDir, versionControls] {
-        return FileNode::scanForFilesWithVersionControls(
-            projectDir,
-            [this](const FileName &fn) -> FileNode * {
-                if (fn != FileName::fromString(projectFilePath().toString() + ".user"))
-                    return new FileNode(fn, FileType::Source, false);
-                else
-                    return nullptr;
-            },
-            versionControls);
+    QFuture<QList<FileNode *>> future = Utils::runAsync([this, projectDir] {
+        return FileNode::scanForFiles(projectDir, [this](const FileName &fn) -> FileNode * {
+            if (fn != FileName::fromString(projectFilePath().toString() + ".user"))
+                return new FileNode(fn, FileType::Source, false);
+            else
+                return nullptr;
+        });
     });
     Utils::onResultReady(future, this, [this](const QList<FileNode *> &nodes) {
         auto root = new HaskellProjectNode(projectDirectory(), id());

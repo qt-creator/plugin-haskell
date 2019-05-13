@@ -77,7 +77,7 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
 
 void HaskellRunConfiguration::doAdditionalSetup(const RunConfigurationCreationInfo &info)
 {
-    extraAspect<HaskellExecutableAspect>()->setValue(info.buildKey);
+    aspect<HaskellExecutableAspect>()->setValue(info.buildKey);
 }
 
 Runnable HaskellRunConfiguration::runnable() const
@@ -90,13 +90,13 @@ Runnable HaskellRunConfiguration::runnable() const
                                         .relativeFilePath(
                                             buildConfiguration->buildDirectory().toString())
                                   + "\" ";
-    const QString executable = extraAspect<HaskellExecutableAspect>()->value();
+    const QString executable = aspect<HaskellExecutableAspect>()->value();
     r.commandLineArguments += "exec \"" + executable + "\"";
-    const QString arguments = extraAspect<ArgumentsAspect>()->arguments(macroExpander());
+    const QString arguments = aspect<ArgumentsAspect>()->arguments(macroExpander());
     if (!arguments.isEmpty())
         r.commandLineArguments += " -- " + arguments;
     r.workingDirectory = projectDirectory;
-    r.environment = extraAspect<LocalEnvironmentAspect>()->environment();
+    r.environment = aspect<LocalEnvironmentAspect>()->environment();
     r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString()).toString();
     return r;
 }

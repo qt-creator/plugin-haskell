@@ -31,17 +31,17 @@
 namespace Haskell {
 namespace Internal {
 
-class HaskellBuildConfigurationFactory : public ProjectExplorer::IBuildConfigurationFactory
+class HaskellBuildConfigurationFactory : public ProjectExplorer::BuildConfigurationFactory
 {
     Q_OBJECT
 
 public:
     HaskellBuildConfigurationFactory();
 
-    QList<ProjectExplorer::BuildInfo *> availableBuilds(
+    QList<ProjectExplorer::BuildInfo> availableBuilds(
         const ProjectExplorer::Target *parent) const override;
-    QList<ProjectExplorer::BuildInfo *> availableSetups(const ProjectExplorer::Kit *k,
-                                                        const QString &projectPath) const override;
+    QList<ProjectExplorer::BuildInfo> availableSetups(const ProjectExplorer::Kit *k,
+                                                      const QString &projectPath) const override;
 };
 
 class HaskellBuildConfiguration : public ProjectExplorer::BuildConfiguration
@@ -54,7 +54,7 @@ public:
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     BuildType buildType() const override;
     void setBuildType(BuildType type);
-    void initialize(const ProjectExplorer::BuildInfo *info) override;
+    void initialize(const ProjectExplorer::BuildInfo &info) override;
 
 private:
     BuildType m_buildType = BuildType::Release;
