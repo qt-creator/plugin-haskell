@@ -28,6 +28,7 @@
 #include "haskellmanager.h"
 
 #include <projectexplorer/buildconfiguration.h>
+#include <projectexplorer/processparameters.h>
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectexplorerconstants.h>
 
@@ -68,7 +69,7 @@ StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl)
 
 BuildStepConfigWidget *StackBuildStep::createConfigWidget()
 {
-    return new SimpleBuildStepConfigWidget(this);
+    return new BuildStepConfigWidget(this);
 }
 
 QString StackBuildStep::trDisplayName()
