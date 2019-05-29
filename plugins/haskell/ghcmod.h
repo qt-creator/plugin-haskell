@@ -59,7 +59,7 @@ class SymbolInfo {
 public:
     QStringList definition;
     QStringList additionalInfo;
-    Utils::FileName file;
+    Utils::FilePath file;
     int line = -1;
     int col = -1;
     QString module;
@@ -80,36 +80,36 @@ using unique_ghcmod_process = std::unique_ptr<QProcess, ghcmod_deleter<QProcess>
 class GhcMod
 {
 public:
-    GhcMod(const Utils::FileName &path);
+    GhcMod(const Utils::FilePath &path);
     ~GhcMod();
 
-    Utils::FileName basePath() const;
-    void setFileMap(const QHash<Utils::FileName, Utils::FileName> &fileMap);
+    Utils::FilePath basePath() const;
+    void setFileMap(const QHash<Utils::FilePath, Utils::FilePath> &fileMap);
 
-    SymbolInfoOrError findSymbol(const Utils::FileName &filePath, const QString &symbol);
-    QStringOrError typeInfo(const Utils::FileName &filePath, int line, int col);
+    SymbolInfoOrError findSymbol(const Utils::FilePath &filePath, const QString &symbol);
+    QStringOrError typeInfo(const Utils::FilePath &filePath, int line, int col);
 
     QByteArrayOrError runQuery(const QString &query);
 
-    QByteArrayOrError runFindSymbol(const Utils::FileName &filePath, const QString &symbol);
-    QByteArrayOrError runTypeInfo(const Utils::FileName &filePath, int line, int col);
+    QByteArrayOrError runFindSymbol(const Utils::FilePath &filePath, const QString &symbol);
+    QByteArrayOrError runTypeInfo(const Utils::FilePath &filePath, int line, int col);
 
     static SymbolInfoOrError parseFindSymbol(const QByteArrayOrError &response);
     static QStringOrError parseTypeInfo(const QByteArrayOrError &response);
 
-   static void setStackExecutable(const Utils::FileName &filePath);
+   static void setStackExecutable(const Utils::FilePath &filePath);
 
 private:
     Utils::optional<Error> ensureStarted();
     void shutdown();
     void log(const QString &message);
 
-    static Utils::FileName m_stackExecutable;
+    static Utils::FilePath m_stackExecutable;
     static QMutex m_mutex;
 
-    Utils::FileName m_path;
+    Utils::FilePath m_path;
     unique_ghcmod_process m_process; // kills process on reset
-    QHash<Utils::FileName, Utils::FileName> m_fileMap;
+    QHash<Utils::FilePath, Utils::FilePath> m_fileMap;
 };
 
 class AsyncGhcMod : public QObject
@@ -124,13 +124,13 @@ public:
         std::function<QByteArrayOrError()> op;
     };
 
-    AsyncGhcMod(const Utils::FileName &path);
+    AsyncGhcMod(const Utils::FilePath &path);
     ~AsyncGhcMod();
 
-    Utils::FileName basePath() const;
+    Utils::FilePath basePath() const;
 
-    QFuture<SymbolInfoOrError> findSymbol(const Utils::FileName &filePath, const QString &symbol);
-    QFuture<QStringOrError> typeInfo(const Utils::FileName &filePath, int line, int col);
+    QFuture<SymbolInfoOrError> findSymbol(const Utils::FilePath &filePath, const QString &symbol);
+    QFuture<QStringOrError> typeInfo(const Utils::FilePath &filePath, int line, int col);
 
 private slots:
     void updateCache(); // called through QMetaObject::invokeMethod

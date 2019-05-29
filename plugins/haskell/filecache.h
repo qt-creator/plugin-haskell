@@ -44,16 +44,16 @@ public:
               const std::function<QList<Core::IDocument *>()> &documentsToUpdate);
 
     void update();
-    QHash<Utils::FileName, Utils::FileName> fileMap() const;
+    QHash<Utils::FilePath, Utils::FilePath> fileMap() const;
 
 private:
     void writeFile(Core::IDocument *document);
     void cleanUp(const QList<Core::IDocument *> &documents);
-    Utils::FileName createCacheFile(const Utils::FileName &filePath);
+    Utils::FilePath createCacheFile(const Utils::FilePath &filePath);
 
     Utils::TemporaryDirectory m_tempDir;
-    QHash<Utils::FileName, Utils::FileName> m_fileMap;
-    QHash<Utils::FileName, int> m_fileRevision;
+    QHash<Utils::FilePath, Utils::FilePath> m_fileMap;
+    QHash<Utils::FilePath, int> m_fileRevision;
     std::function<QList<Core::IDocument *>()> m_documentsToUpdate;
 };
 

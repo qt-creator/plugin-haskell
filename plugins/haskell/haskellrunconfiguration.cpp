@@ -33,6 +33,7 @@
 #include <projectexplorer/localenvironmentaspect.h>
 #include <projectexplorer/projectexplorerconstants.h>
 #include <projectexplorer/runconfigurationaspects.h>
+#include <projectexplorer/runcontrol.h>
 #include <projectexplorer/target.h>
 
 using namespace ProjectExplorer;
@@ -45,7 +46,6 @@ HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
     registerRunConfiguration<HaskellRunConfiguration>("Haskell.RunConfiguration");
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
-    addRunWorkerFactory<SimpleTargetRunner>(ProjectExplorer::Constants::NORMAL_RUN_MODE);
 }
 
 HaskellExecutableAspect::HaskellExecutableAspect()
@@ -57,18 +57,17 @@ HaskellExecutableAspect::HaskellExecutableAspect()
 HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
     : RunConfiguration(target, id)
 {
-    auto envAspect = addAspect<LocalEnvironmentAspect>
-            (target, LocalEnvironmentAspect::BaseEnvironmentModifier());
+    addAspect<LocalEnvironmentAspect>(target);
 
     auto executableAspect = addAspect<HaskellExecutableAspect>();
     connect(target, &Target::applicationTargetsChanged, this, [this, target, executableAspect] {
-        BuildTargetInfo bti = target->applicationTargets().buildTargetInfo(buildKey());
+        BuildTargetInfo bti = target->buildTarget(buildKey());
         executableAspect->setValue(bti.targetFilePath.toString());
     });
 
     addAspect<ArgumentsAspect>();
 
-    auto workingDirAspect = addAspect<WorkingDirectoryAspect>(envAspect);
+    auto workingDirAspect = addAspect<WorkingDirectoryAspect>();
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
     workingDirAspect->setVisible(false);
 

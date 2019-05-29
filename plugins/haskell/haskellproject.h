@@ -34,7 +34,7 @@ namespace Internal {
 class HaskellProjectNode : public ProjectExplorer::ProjectNode
 {
 public:
-    HaskellProjectNode(const Utils::FileName &projectFilePath, Core::Id id);
+    HaskellProjectNode(const Utils::FilePath &projectFilePath);
 };
 
 class HaskellProject : public ProjectExplorer::Project
@@ -42,7 +42,7 @@ class HaskellProject : public ProjectExplorer::Project
     Q_OBJECT
 
 public:
-    explicit HaskellProject(const Utils::FileName &fileName);
+    explicit HaskellProject(const Utils::FilePath &fileName);
 
     static bool isHaskellProject(Project *project);
 

@@ -60,12 +60,12 @@ HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory()
 
 static QList<BuildInfo> createInfos(const HaskellBuildConfigurationFactory *factory,
                                     const Kit *k,
-                                    const Utils::FileName &projectFilePath)
+                                    const Utils::FilePath &projectFilePath)
 {
     BuildInfo info(factory);
     info.typeName = HaskellBuildConfigurationFactory::tr("Release");
     info.displayName = info.typeName;
-    info.buildDirectory = projectFilePath.parentDir().appendPath(".stack-work");
+    info.buildDirectory = projectFilePath.parentDir().pathAppended(".stack-work");
     info.kitId = k->id();
     info.buildType = BuildConfiguration::BuildType::Release;
     return {info};
@@ -84,7 +84,7 @@ QList<BuildInfo> HaskellBuildConfigurationFactory::availableBuilds(const Target 
 QList<BuildInfo> HaskellBuildConfigurationFactory::availableSetups(
     const Kit *k, const QString &projectPath) const
 {
-    return createInfos(this, k, Utils::FileName::fromString(projectPath));
+    return createInfos(this, k, Utils::FilePath::fromString(projectPath));
 }
 
 HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)

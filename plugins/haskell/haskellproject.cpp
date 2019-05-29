@@ -47,7 +47,7 @@ using namespace Utils;
 namespace Haskell {
 namespace Internal {
 
-static QVector<QString> parseExecutableNames(const FileName &projectFilePath)
+static QVector<QString> parseExecutableNames(const FilePath &projectFilePath)
 {
     static const QString EXECUTABLE = "executable";
     static const int EXECUTABLE_LEN = EXECUTABLE.length();
@@ -65,11 +65,11 @@ static QVector<QString> parseExecutableNames(const FileName &projectFilePath)
     return result;
 }
 
-HaskellProjectNode::HaskellProjectNode(const FileName &projectFilePath, Core::Id id)
-    : ProjectNode(projectFilePath, id.toString().toLatin1())
+HaskellProjectNode::HaskellProjectNode(const FilePath &projectFilePath)
+    : ProjectNode(projectFilePath)
 {}
 
-HaskellProject::HaskellProject(const Utils::FileName &fileName)
+HaskellProject::HaskellProject(const Utils::FilePath &fileName)
     : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName, [this] { refresh(); })
 {
     setId(Constants::C_HASKELL_PROJECT_ID);
@@ -86,17 +86,17 @@ bool HaskellProject::isHaskellProject(Project *project)
 void HaskellProject::updateFiles()
 {
     emitParsingStarted();
-    FileName projectDir = projectDirectory();
+    FilePath projectDir = projectDirectory();
     QFuture<QList<FileNode *>> future = Utils::runAsync([this, projectDir] {
-        return FileNode::scanForFiles(projectDir, [this](const FileName &fn) -> FileNode * {
-            if (fn != FileName::fromString(projectFilePath().toString() + ".user"))
-                return new FileNode(fn, FileType::Source, false);
+        return FileNode::scanForFiles(projectDir, [this](const FilePath &fn) -> FileNode * {
+            if (fn != FilePath::fromString(projectFilePath().toString() + ".user"))
+                return new FileNode(fn, FileType::Source);
             else
                 return nullptr;
         });
     });
     Utils::onResultReady(future, this, [this](const QList<FileNode *> &nodes) {
-        auto root = new HaskellProjectNode(projectDirectory(), id());
+        auto root = new HaskellProjectNode(projectDirectory());
         root->setDisplayName(displayName());
         std::vector<std::unique_ptr<FileNode>> nodePtrs
             = Utils::transform<std::vector>(nodes, [](FileNode *fn) {
@@ -112,20 +112,18 @@ void HaskellProject::updateApplicationTargets(Target *target)
 {
     QTC_ASSERT(target, return);
     const QVector<QString> executables = parseExecutableNames(projectFilePath());
-    const Utils::FileName projFilePath = projectFilePath();
+    const Utils::FilePath projFilePath = projectFilePath();
     const QList<BuildTargetInfo> appTargets
         = Utils::transform<QList>(executables, [projFilePath](const QString &executable) {
               BuildTargetInfo bti;
               bti.displayName = executable;
               bti.buildKey = executable;
-              bti.targetFilePath = FileName::fromString(executable);
+              bti.targetFilePath = FilePath::fromString(executable);
               bti.projectFilePath = projFilePath;
               bti.isQtcRunnable = true;
               return bti;
           });
-    BuildTargetInfoList list;
-    list.list = appTargets;
-    target->setApplicationTargets(list);
+    target->setApplicationTargets(appTargets);
     target->updateDefaultRunConfigurations();
 }
 

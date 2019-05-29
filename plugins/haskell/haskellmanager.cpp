@@ -46,8 +46,8 @@ namespace Internal {
 class HaskellManagerPrivate
 {
 public:
-    std::unordered_map<FileName, std::weak_ptr<AsyncGhcMod>> ghcModCache;
-    FileName stackExecutable;
+    std::unordered_map<FilePath, std::weak_ptr<AsyncGhcMod>> ghcModCache;
+    FilePath stackExecutable;
 };
 
 Q_GLOBAL_STATIC(HaskellManagerPrivate, m_d)
@@ -58,10 +58,10 @@ HaskellManager *HaskellManager::instance()
     return m_instance;
 }
 
-FileName HaskellManager::findProjectDirectory(const FileName &filePath)
+FilePath HaskellManager::findProjectDirectory(const FilePath &filePath)
 {
     if (filePath.isEmpty())
-        return FileName();
+        return {};
 
     QDir directory(filePath.toFileInfo().isDir() ? filePath.toString()
                                                  : filePath.parentDir().toString());
@@ -69,14 +69,14 @@ FileName HaskellManager::findProjectDirectory(const FileName &filePath)
     directory.setFilter(QDir::Files | QDir::Readable);
     do {
         if (!directory.entryList().isEmpty())
-            return FileName::fromString(directory.path());
+            return FilePath::fromString(directory.path());
     } while (!directory.isRoot() && directory.cdUp());
-    return FileName();
+    return {};
 }
 
-std::shared_ptr<AsyncGhcMod> HaskellManager::ghcModForFile(const FileName &filePath)
+std::shared_ptr<AsyncGhcMod> HaskellManager::ghcModForFile(const FilePath &filePath)
 {
-    const FileName projectPath = findProjectDirectory(filePath);
+    const FilePath projectPath = findProjectDirectory(filePath);
     const auto cacheEntry = m_d->ghcModCache.find(projectPath);
     if (cacheEntry != m_d->ghcModCache.cend()) {
         if (cacheEntry->second.expired())
@@ -89,21 +89,21 @@ std::shared_ptr<AsyncGhcMod> HaskellManager::ghcModForFile(const FileName &fileP
     return ghcmod;
 }
 
-FileName defaultStackExecutable()
+FilePath defaultStackExecutable()
 {
     // stack from brew or the installer script from https://docs.haskellstack.org
     // install to /usr/local/bin.
     if (HostOsInfo::isAnyUnixHost())
-        return FileName::fromString("/usr/local/bin/stack");
-    return FileName::fromString("stack");
+        return FilePath::fromString("/usr/local/bin/stack");
+    return FilePath::fromString("stack");
 }
 
-FileName HaskellManager::stackExecutable()
+FilePath HaskellManager::stackExecutable()
 {
     return m_d->stackExecutable;
 }
 
-void HaskellManager::setStackExecutable(const FileName &filePath)
+void HaskellManager::setStackExecutable(const FilePath &filePath)
 {
     if (filePath == m_d->stackExecutable)
         return;
@@ -113,7 +113,7 @@ void HaskellManager::setStackExecutable(const FileName &filePath)
 
 void HaskellManager::readSettings(QSettings *settings)
 {
-    m_d->stackExecutable = FileName::fromString(
+    m_d->stackExecutable = FilePath::fromString(
                 settings->value(kStackExecutableKey,
                                 defaultStackExecutable().toString()).toString());
     emit m_instance->stackExecutableChanged(m_d->stackExecutable);

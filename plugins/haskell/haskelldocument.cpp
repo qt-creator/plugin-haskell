@@ -37,7 +37,7 @@ namespace Internal {
 HaskellDocument::HaskellDocument()
     : TextDocument(Constants::C_HASKELLEDITOR_ID)
 {
-    connect(this, &IDocument::filePathChanged, this, [this](const FileName &, const FileName &fn) {
+    connect(this, &IDocument::filePathChanged, this, [this](const FilePath &, const FilePath &fn) {
         m_ghcmod = HaskellManager::ghcModForFile(fn);
     });
 }

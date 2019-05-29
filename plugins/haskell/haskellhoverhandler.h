@@ -44,7 +44,7 @@ private:
 
     void cancel();
 
-    Utils::FileName m_filePath;
+    Utils::FilePath m_filePath;
     int m_line = -1;
     int m_col = -1;
     QString m_name;

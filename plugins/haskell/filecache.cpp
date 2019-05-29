@@ -56,7 +56,7 @@ void FileCache::update()
 {
     const QList<IDocument *> documents = m_documentsToUpdate();
     for (IDocument *document : documents) {
-        const Utils::FileName filePath = document->filePath();
+        const Utils::FilePath filePath = document->filePath();
         if (m_fileMap.contains(filePath)) {
             // update the existing cached file
             // check revision if possible
@@ -75,14 +75,14 @@ void FileCache::update()
     cleanUp(documents);
 }
 
-QHash<FileName, FileName> FileCache::fileMap() const
+QHash<FilePath, FilePath> FileCache::fileMap() const
 {
     return m_fileMap;
 }
 
 void FileCache::writeFile(IDocument *document)
 {
-    FileName cacheFilePath = m_fileMap.value(document->filePath());
+    FilePath cacheFilePath = m_fileMap.value(document->filePath());
     if (cacheFilePath.isEmpty()) {
         cacheFilePath = createCacheFile(document->filePath());
         m_fileMap.insert(document->filePath(), cacheFilePath);
@@ -114,8 +114,8 @@ void FileCache::writeFile(IDocument *document)
 
 void FileCache::cleanUp(const QList<IDocument *> &documents)
 {
-    const QSet<FileName> files = Utils::transform<QSet>(documents, &IDocument::filePath);
-    auto it = QMutableHashIterator<FileName, FileName>(m_fileMap);
+    const QSet<FilePath> files = Utils::transform<QSet>(documents, &IDocument::filePath);
+    auto it = QMutableHashIterator<FilePath, FilePath>(m_fileMap);
     while (it.hasNext()) {
         it.next();
         if (!files.contains(it.key())) {
@@ -127,12 +127,12 @@ void FileCache::cleanUp(const QList<IDocument *> &documents)
     }
 }
 
-FileName FileCache::createCacheFile(const FileName &filePath)
+FilePath FileCache::createCacheFile(const FilePath &filePath)
 {
     QTemporaryFile tempFile(m_tempDir.path() + "/XXXXXX-" + filePath.fileName());
     tempFile.setAutoRemove(false);
     tempFile.open();
-    return FileName::fromString(tempFile.fileName());
+    return FilePath::fromString(tempFile.fileName());
 }
 
 } // namespace Internal

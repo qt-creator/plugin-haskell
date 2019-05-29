@@ -53,15 +53,15 @@ StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl)
     const auto updateEnvironment = [this] {
         processParameters()->setEnvironment(buildConfiguration()->environment());
     };
-    processParameters()->setCommand(HaskellManager::stackExecutable().toString());
+    processParameters()->setCommand(HaskellManager::stackExecutable());
     updateArguments();
-    processParameters()->setWorkingDirectory(project()->projectDirectory().toString());
+    processParameters()->setWorkingDirectory(project()->projectDirectory());
     updateEnvironment();
     connect(HaskellManager::instance(),
             &HaskellManager::stackExecutableChanged,
             this,
-            [this](const Utils::FileName &stackExe) {
-                processParameters()->setCommand(stackExe.toString());
+            [this](const Utils::FilePath &stackExe) {
+                processParameters()->setCommand(stackExe);
             });
     connect(buildConfiguration(), &BuildConfiguration::buildDirectoryChanged, this, updateArguments);
     connect(buildConfiguration(), &BuildConfiguration::environmentChanged, this, updateEnvironment);

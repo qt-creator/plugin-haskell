@@ -70,7 +70,7 @@ IAssistProposal *FollowSymbolAssistProcessor::immediateProposal(const AssistInte
             = HaskellEditorWidget::symbolAt(interface->textDocument(), interface->position(),
                                             &line, &column);
     QTC_ASSERT(symbol, return nullptr); // should have been checked before
-    const auto filePath = FileName::fromString(interface->fileName());
+    const auto filePath = FilePath::fromString(interface->fileName());
     m_ghcmod = HaskellManager::ghcModForFile(filePath);
     m_symbolFuture = m_ghcmod->findSymbol(filePath, symbol->text.toString());
 
@@ -94,7 +94,7 @@ IAssistProposal *FollowSymbolAssistProcessor::perform(const AssistInterface *int
     return new InstantProposal(position, {item});
 }
 
-FollowSymbolAssistProposalItem::FollowSymbolAssistProposalItem(const FileName &basePath,
+FollowSymbolAssistProposalItem::FollowSymbolAssistProposalItem(const FilePath &basePath,
                                                                const SymbolInfoOrError &info,
                                                                bool inNextSplit)
     : m_basePath(basePath),

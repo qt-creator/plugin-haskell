@@ -45,17 +45,17 @@ class HaskellManager : public QObject
 public:
     static HaskellManager *instance();
 
-    static Utils::FileName findProjectDirectory(const Utils::FileName &filePath);
-    static std::shared_ptr<AsyncGhcMod> ghcModForFile(const Utils::FileName &filePath);
-    static Utils::FileName stackExecutable();
-    static void setStackExecutable(const Utils::FileName &filePath);
+    static Utils::FilePath findProjectDirectory(const Utils::FilePath &filePath);
+    static std::shared_ptr<AsyncGhcMod> ghcModForFile(const Utils::FilePath &filePath);
+    static Utils::FilePath stackExecutable();
+    static void setStackExecutable(const Utils::FilePath &filePath);
     static void readSettings(QSettings *settings);
     static void writeSettings(QSettings *settings);
 
     static QString trLookingUp(const QString &name);
 
 signals:
-    void stackExecutableChanged(const Utils::FileName &filePath);
+    void stackExecutableChanged(const Utils::FilePath &filePath);
 };
 
 } // namespace Internal

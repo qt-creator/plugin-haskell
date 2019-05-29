@@ -39,14 +39,14 @@ namespace Internal {
 class FollowSymbolAssistProposalItem : public TextEditor::AssistProposalItem
 {
 public:
-    FollowSymbolAssistProposalItem(const Utils::FileName &basePath,
+    FollowSymbolAssistProposalItem(const Utils::FilePath &basePath,
                                    const SymbolInfoOrError &info,
                                    bool inNextSplit);
 
     void apply(TextEditor::TextDocumentManipulatorInterface &, int) const override;
 
 private:
-    Utils::FileName m_basePath;
+    Utils::FilePath m_basePath;
     SymbolInfoOrError m_info;
     bool m_inNextSplit;
 };

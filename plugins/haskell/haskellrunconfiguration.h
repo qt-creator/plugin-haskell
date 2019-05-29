@@ -26,23 +26,10 @@
 #pragma once
 
 #include <projectexplorer/runconfigurationaspects.h>
+#include <projectexplorer/runcontrol.h>
 
 namespace Haskell {
 namespace Internal {
-
-class HaskellRunConfigurationFactory : public ProjectExplorer::RunConfigurationFactory
-{
-public:
-    HaskellRunConfigurationFactory();
-};
-
-class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
-{
-    Q_OBJECT
-
-public:
-    HaskellExecutableAspect();
-};
 
 class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
 {
@@ -54,6 +41,25 @@ public:
 private:
     void doAdditionalSetup(const ProjectExplorer::RunConfigurationCreationInfo &info) final;
     ProjectExplorer::Runnable runnable() const final;
+};
+
+class HaskellRunConfigurationFactory : public ProjectExplorer::RunConfigurationFactory
+{
+public:
+    HaskellRunConfigurationFactory();
+
+private:
+    ProjectExplorer::SimpleRunWorkerFactory<ProjectExplorer::SimpleTargetRunner,
+                                            HaskellRunConfiguration>
+        runWorkerFactory;
+};
+
+class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
+{
+    Q_OBJECT
+
+public:
+    HaskellExecutableAspect();
 };
 
 } // namespace Internal

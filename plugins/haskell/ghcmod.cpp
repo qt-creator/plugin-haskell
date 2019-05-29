@@ -54,10 +54,10 @@ using namespace Utils;
 namespace Haskell {
 namespace Internal {
 
-FileName GhcMod::m_stackExecutable = Utils::FileName::fromString("stack");
+FilePath GhcMod::m_stackExecutable = Utils::FilePath::fromString("stack");
 QMutex GhcMod::m_mutex;
 
-GhcMod::GhcMod(const Utils::FileName &path)
+GhcMod::GhcMod(const Utils::FilePath &path)
     : m_path(path)
 {
 }
@@ -67,12 +67,12 @@ GhcMod::~GhcMod()
     shutdown();
 }
 
-FileName GhcMod::basePath() const
+FilePath GhcMod::basePath() const
 {
     return m_path;
 }
 
-void GhcMod::setFileMap(const QHash<FileName, FileName> &fileMap)
+void GhcMod::setFileMap(const QHash<FilePath, FilePath> &fileMap)
 {
     if (fileMap != m_fileMap) {
         log("setting new file map");
@@ -88,17 +88,17 @@ static QString toUnicode(QByteArray data)
     return QString::fromUtf8(data);
 }
 
-SymbolInfoOrError GhcMod::findSymbol(const FileName &filePath, const QString &symbol)
+SymbolInfoOrError GhcMod::findSymbol(const FilePath &filePath, const QString &symbol)
 {
     return parseFindSymbol(runFindSymbol(filePath, symbol));
 }
 
-QStringOrError GhcMod::typeInfo(const FileName &filePath, int line, int col)
+QStringOrError GhcMod::typeInfo(const FilePath &filePath, int line, int col)
 {
     return parseTypeInfo(runTypeInfo(filePath, line, col));
 }
 
-static QStringList fileMapArgs(const QHash<FileName, FileName> &map)
+static QStringList fileMapArgs(const QHash<FilePath, FilePath> &map)
 {
     QStringList result;
     const auto end = map.cend();
@@ -110,15 +110,15 @@ static QStringList fileMapArgs(const QHash<FileName, FileName> &map)
 Utils::optional<Error> GhcMod::ensureStarted()
 {
     m_mutex.lock();
-    const FileName plainStackExecutable = m_stackExecutable;
+    const FilePath plainStackExecutable = m_stackExecutable;
     m_mutex.unlock();
     Environment env = Environment::systemEnvironment();
-    const FileName stackExecutable = env.searchInPath(plainStackExecutable.toString());
+    const FilePath stackExecutable = env.searchInPath(plainStackExecutable.toString());
     if (m_process) {
         if (m_process->state() == QProcess::NotRunning) {
             log("is no longer running");
             m_process.reset();
-        } else if (FileName::fromString(m_process->program()) != stackExecutable) {
+        } else if (FilePath::fromString(m_process->program()) != stackExecutable) {
             log("stack settings changed");
             shutdown();
         }
@@ -190,13 +190,13 @@ QByteArrayOrError GhcMod::runQuery(const QString &query)
     return response;
 }
 
-QByteArrayOrError GhcMod::runFindSymbol(const FileName &filePath, const QString &symbol)
+QByteArrayOrError GhcMod::runFindSymbol(const FilePath &filePath, const QString &symbol)
 {
     return runQuery(QString("info %1 %2").arg(filePath.toString()) // TODO toNative? quoting?
                     .arg(symbol));
 }
 
-QByteArrayOrError GhcMod::runTypeInfo(const FileName &filePath, int line, int col)
+QByteArrayOrError GhcMod::runTypeInfo(const FilePath &filePath, int line, int col)
 {
     return runQuery(QString("type %1 %2 %3").arg(filePath.toString()) // TODO toNative? quoting?
                     .arg(line)
@@ -221,7 +221,7 @@ SymbolInfoOrError GhcMod::parseFindSymbol(const QByteArrayOrError &response)
                 hasFileOrModule = true;
                 info.definition += result.captured(1);
                 if (result.lastCapturedIndex() == 7) { // Defined at <file:line:col>
-                    info.file = FileName::fromString(result.captured(4));
+                    info.file = FilePath::fromString(result.captured(4));
                     bool ok;
                     int num = result.captured(6).toInt(&ok);
                     if (ok)
@@ -255,20 +255,20 @@ QStringOrError GhcMod::parseTypeInfo(const QByteArrayOrError &response)
     return Error({Error::Type::Other, QString()});
 }
 
-void GhcMod::setStackExecutable(const FileName &filePath)
+void GhcMod::setStackExecutable(const FilePath &filePath)
 {
     QMutexLocker lock(&m_mutex);
     m_stackExecutable = filePath;
 }
 
-static QList<Core::IDocument *> getOpenDocuments(const FileName &path)
+static QList<Core::IDocument *> getOpenDocuments(const FilePath &path)
 {
     return Utils::filtered(Core::DocumentModel::openedDocuments(), [path] (Core::IDocument *doc) {
         return path.isEmpty() || doc->filePath().isChildOf(path);
     });
 }
 
-AsyncGhcMod::AsyncGhcMod(const FileName &path)
+AsyncGhcMod::AsyncGhcMod(const FilePath &path)
     : m_ghcmod(path),
       m_fileCache("haskell", std::bind(getOpenDocuments, path))
 {
@@ -289,7 +289,7 @@ AsyncGhcMod::~AsyncGhcMod()
     m_thread.wait();
 }
 
-FileName AsyncGhcMod::basePath() const
+FilePath AsyncGhcMod::basePath() const
 {
     return m_ghcmod.basePath();
 }
@@ -330,7 +330,7 @@ QFuture<Result> createFuture(AsyncGhcMod::Operation op,
     Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
     while waiting for it to finish - doing so will result in a deadlock.
 */
-QFuture<SymbolInfoOrError> AsyncGhcMod::findSymbol(const FileName &filePath,
+QFuture<SymbolInfoOrError> AsyncGhcMod::findSymbol(const FilePath &filePath,
                                                              const QString &symbol)
 {
     QMutexLocker lock(&m_mutex);
@@ -346,7 +346,7 @@ QFuture<SymbolInfoOrError> AsyncGhcMod::findSymbol(const FileName &filePath,
     Returns a QFuture handle for the asynchronous operation. You may not block the main event loop
     while waiting for it to finish - doing so will result in a deadlock.
 */
-QFuture<QStringOrError> AsyncGhcMod::typeInfo(const FileName &filePath, int line, int col)
+QFuture<QStringOrError> AsyncGhcMod::typeInfo(const FilePath &filePath, int line, int col)
 {
     QMutexLocker lock(&m_mutex);
     Operation op([this, filePath, line, col] { return m_ghcmod.runTypeInfo(filePath, line, col); });
