@@ -38,10 +38,9 @@ class HaskellBuildConfigurationFactory : public ProjectExplorer::BuildConfigurat
 public:
     HaskellBuildConfigurationFactory();
 
-    QList<ProjectExplorer::BuildInfo> availableBuilds(
-        const ProjectExplorer::Target *parent) const override;
-    QList<ProjectExplorer::BuildInfo> availableSetups(const ProjectExplorer::Kit *k,
-                                                      const QString &projectPath) const override;
+    QList<ProjectExplorer::BuildInfo> availableBuilds(const ProjectExplorer::Kit *k,
+                                                      const Utils::FilePath &projectPath,
+                                                      bool forSetup) const override;
 };
 
 class HaskellBuildConfiguration : public ProjectExplorer::BuildConfiguration
@@ -54,7 +53,7 @@ public:
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     BuildType buildType() const override;
     void setBuildType(BuildType type);
-    void initialize(const ProjectExplorer::BuildInfo &info) override;
+    void initialize() override;
 
 private:
     BuildType m_buildType = BuildType::Release;

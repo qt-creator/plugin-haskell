@@ -58,33 +58,18 @@ HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory()
     setSupportedProjectMimeTypeName(Constants::C_HASKELL_PROJECT_MIMETYPE);
 }
 
-static QList<BuildInfo> createInfos(const HaskellBuildConfigurationFactory *factory,
-                                    const Kit *k,
-                                    const Utils::FilePath &projectFilePath)
+QList<BuildInfo> HaskellBuildConfigurationFactory::availableBuilds(
+    const Kit *k, const Utils::FilePath &projectPath, bool forSetup) const
 {
-    BuildInfo info(factory);
+    BuildInfo info(this);
     info.typeName = HaskellBuildConfigurationFactory::tr("Release");
-    info.displayName = info.typeName;
-    info.buildDirectory = projectFilePath.parentDir().pathAppended(".stack-work");
+    if (forSetup) {
+        info.displayName = info.typeName;
+        info.buildDirectory = projectPath.parentDir().pathAppended(".stack-work");
+    }
     info.kitId = k->id();
     info.buildType = BuildConfiguration::BuildType::Release;
     return {info};
-}
-
-QList<BuildInfo> HaskellBuildConfigurationFactory::availableBuilds(const Target *parent) const
-{
-    // Entries that are available in add build configuration dropdown
-    return Utils::transform(createInfos(this, parent->kit(), parent->project()->projectFilePath()),
-                            [](BuildInfo info) {
-                                info.displayName.clear();
-                                return info;
-                            });
-}
-
-QList<BuildInfo> HaskellBuildConfigurationFactory::availableSetups(
-    const Kit *k, const QString &projectPath) const
-{
-    return createInfos(this, k, Utils::FilePath::fromString(projectPath));
 }
 
 HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)
@@ -106,12 +91,12 @@ void HaskellBuildConfiguration::setBuildType(BuildConfiguration::BuildType type)
     m_buildType = type;
 }
 
-void HaskellBuildConfiguration::initialize(const BuildInfo &info)
+void HaskellBuildConfiguration::initialize()
 {
-    BuildConfiguration::initialize(info);
-    setBuildDirectory(info.buildDirectory);
-    setBuildType(info.buildType);
-    setDisplayName(info.displayName);
+    BuildConfiguration::initialize();
+    setBuildDirectory(initialBuildDirectory());
+    setBuildType(initialBuildType());
+    setDisplayName(initialDisplayName());
 
     BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
     auto stackBuildStep = new StackBuildStep(buildSteps);
