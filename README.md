@@ -1,24 +1,42 @@
-### Haskell Support for Qt Creator
+# Haskell Support for Qt Creator
 
 This Qt Creator plugin adds basic support for the Haskell programming language.
 
-#### Features
+## Features
 
-* Code highlighting
-* Editor tool tips with symbol information
-* Follow symbol
+* Syntax highlighting
 * Basic .cabal project support
 * Basic build configuration
 * Basic run configuration
 
-#### Requirements
+Other editing features like code completion and navigation are provided via
+[haskell-ide-engine](https://github.com/haskell/haskell-ide-engine) and Qt Creator's
+Language Server Protocol client.
+
+## Requirements
+
+### Projects
 
 The plugin currently only supports projects using [Haskell Stack](https://haskellstack.org).
 
-The project must already be set up, if something mysteriously does not work check the following:
+* The plugin looks for the `stack` executable in the default installation directory of the Haskell
+  Stack installers. If this is not correct for you, adapt the path in *Options* > *Haskell*.
 
-* The project's resolver must be installed. Ensure this by running `stack setup` in the project directory.
-* For code info and navigation to work, `ghc-mod` is required to be built for the project's resolver. Ensure this by running `stack build ghc-mod` in the project directory.
-* The plugin looks for the `stack` executable in the default installation directory of the Haskell Stack installers. If this is not correct for you, adapt the path in *Options* > *Haskell*.
+Linux: Note that Haskell Stack from the Ubuntu distribution and probably others is hopelessly
+outdated. Use the installers provided by the [Haskell Stack](https://haskellstack.org) project.
 
-Linux: Note that Haskell Stack from the Ubuntu distribution and probably others is hopelessly outdated. Use the installers provided by the [Haskell Stack](https://haskellstack.org) project.
+### Editing
+
+Install [haskell-ide-engine](https://github.com/haskell/haskell-ide-engine) for the GHC version
+that your project uses and [configure it](https://doc.qt.io/qtcreator/creator-language-servers.html)
+in Qt Creator's language client:
+
+* Open *Options* > *Language Client*
+* Add a new server
+* Set *Language* to the MIME types `text/x-haskell`, `text/x-haskell-project` and
+  `text/x-literate-haskell`
+* Set *Startup behavior* to *Start Server per Project*
+* Set *Executable* to `hie-wrapper`, for example to `/home/myself/.local/bin/hie-wrapper`
+* Set *Arguments* to `-lsp`
+
+Note that HIE compiles your project before providing any information, so it might take some time.

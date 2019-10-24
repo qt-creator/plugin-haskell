@@ -25,8 +25,6 @@
 
 #include "haskellmanager.h"
 
-#include "ghcmod.h"
-
 #include <utils/hostosinfo.h>
 
 #include <QCoreApplication>
@@ -46,7 +44,6 @@ namespace Internal {
 class HaskellManagerPrivate
 {
 public:
-    std::unordered_map<FilePath, std::weak_ptr<AsyncGhcMod>> ghcModCache;
     FilePath stackExecutable;
 };
 
@@ -72,21 +69,6 @@ FilePath HaskellManager::findProjectDirectory(const FilePath &filePath)
             return FilePath::fromString(directory.path());
     } while (!directory.isRoot() && directory.cdUp());
     return {};
-}
-
-std::shared_ptr<AsyncGhcMod> HaskellManager::ghcModForFile(const FilePath &filePath)
-{
-    const FilePath projectPath = findProjectDirectory(filePath);
-    const auto cacheEntry = m_d->ghcModCache.find(projectPath);
-    if (cacheEntry != m_d->ghcModCache.cend()) {
-        if (cacheEntry->second.expired())
-            m_d->ghcModCache.erase(cacheEntry);
-        else
-            return cacheEntry->second.lock();
-    }
-    auto ghcmod = std::make_shared<AsyncGhcMod>(projectPath);
-    m_d->ghcModCache.insert(std::make_pair(projectPath, ghcmod));
-    return ghcmod;
 }
 
 FilePath defaultStackExecutable()
@@ -125,11 +107,6 @@ void HaskellManager::writeSettings(QSettings *settings)
         settings->remove(kStackExecutableKey);
     else
         settings->setValue(kStackExecutableKey, m_d->stackExecutable.toString());
-}
-
-QString HaskellManager::trLookingUp(const QString &name)
-{
-    return QCoreApplication::translate("HaskellManager", "Looking up \"%1\"...").arg(name);
 }
 
 } // namespace Internal

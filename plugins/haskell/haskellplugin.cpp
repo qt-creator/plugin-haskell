@@ -25,7 +25,6 @@
 
 #include "haskellplugin.h"
 
-#include "ghcmod.h"
 #include "haskellbuildconfiguration.h"
 #include "haskellconstants.h"
 #include "haskelleditorfactory.h"
@@ -72,8 +71,6 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
     connect(Core::ICore::instance(), &Core::ICore::saveSettingsRequested, this, [] {
         HaskellManager::writeSettings(Core::ICore::settings());
     });
-    connect(HaskellManager::instance(), &HaskellManager::stackExecutableChanged,
-            &GhcMod::setStackExecutable);
 
     HaskellManager::readSettings(Core::ICore::settings());
     return true;

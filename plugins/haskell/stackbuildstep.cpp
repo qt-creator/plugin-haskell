@@ -44,26 +44,28 @@ StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl)
 {
     setDefaultDisplayName(trDisplayName());
 
-    const auto updateArguments = [this] {
+    const auto updateCommandLine = [this] {
         const auto projectDir = QDir(project()->projectDirectory().toString());
-        processParameters()->setArguments(
-            "build --work-dir \""
-            + projectDir.relativeFilePath(buildConfiguration()->buildDirectory().toString()) + "\"");
+        processParameters()->setCommandLine(
+            {HaskellManager::stackExecutable(),
+             {"build",
+              "--work-dir",
+              projectDir.relativeFilePath(buildConfiguration()->buildDirectory().toString())}});
     };
     const auto updateEnvironment = [this] {
         processParameters()->setEnvironment(buildConfiguration()->environment());
     };
-    processParameters()->setCommand(HaskellManager::stackExecutable());
-    updateArguments();
+    updateCommandLine();
     processParameters()->setWorkingDirectory(project()->projectDirectory());
     updateEnvironment();
     connect(HaskellManager::instance(),
             &HaskellManager::stackExecutableChanged,
             this,
-            [this](const Utils::FilePath &stackExe) {
-                processParameters()->setCommand(stackExe);
-            });
-    connect(buildConfiguration(), &BuildConfiguration::buildDirectoryChanged, this, updateArguments);
+            updateCommandLine);
+    connect(buildConfiguration(),
+            &BuildConfiguration::buildDirectoryChanged,
+            this,
+            updateCommandLine);
     connect(buildConfiguration(), &BuildConfiguration::environmentChanged, this, updateEnvironment);
 }
 

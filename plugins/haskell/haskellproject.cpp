@@ -70,12 +70,13 @@ HaskellProjectNode::HaskellProjectNode(const FilePath &projectFilePath)
 {}
 
 HaskellProject::HaskellProject(const Utils::FilePath &fileName)
-    : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName, [this] { refresh(); })
+    : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName)
 {
     setId(Constants::C_HASKELL_PROJECT_ID);
     setDisplayName(fileName.toFileInfo().completeBaseName());
     updateFiles();
     connect(this, &Project::activeTargetChanged, this, &HaskellProject::updateApplicationTargets);
+    connect(this, &Project::projectFileIsDirty, this, &HaskellProject::refresh);
 }
 
 bool HaskellProject::isHaskellProject(Project *project)
@@ -85,7 +86,7 @@ bool HaskellProject::isHaskellProject(Project *project)
 
 void HaskellProject::updateFiles()
 {
-    emitParsingStarted();
+    m_parseGuard = guardParsingRun();
     FilePath projectDir = projectDirectory();
     QFuture<QList<FileNode *>> future = Utils::runAsync([this, projectDir] {
         return FileNode::scanForFiles(projectDir, [this](const FilePath &fn) -> FileNode * {
@@ -104,7 +105,8 @@ void HaskellProject::updateFiles()
               });
         root->addNestedNodes(std::move(nodePtrs));
         setRootProjectNode(std::unique_ptr<ProjectNode>(root));
-        emitParsingFinished(true);
+        m_parseGuard.markAsSuccess();
+        m_parseGuard = {};
     });
 }
 

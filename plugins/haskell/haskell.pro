@@ -3,19 +3,12 @@ DEFINES += HASKELL_LIBRARY
 # Haskell files
 
 SOURCES += \
-    haskellcompletionassist.cpp \
     haskelleditorfactory.cpp \
-    haskellhoverhandler.cpp \
     haskellplugin.cpp \
     haskellhighlighter.cpp \
     haskelltokenizer.cpp \
-    ghcmod.cpp \
     haskellmanager.cpp \
-    haskelldocument.cpp \
     optionspage.cpp \
-    filecache.cpp \
-    haskelleditorwidget.cpp \
-    followsymbol.cpp \
     haskellproject.cpp \
     haskellbuildconfiguration.cpp \
     stackbuildstep.cpp \
@@ -23,20 +16,13 @@ SOURCES += \
 
 HEADERS += \
     haskell_global.h \
-    haskellcompletionassist.h \
     haskellconstants.h \
     haskelleditorfactory.h \
-    haskellhoverhandler.h \
     haskellplugin.h \
     haskellhighlighter.h \
     haskelltokenizer.h \
-    ghcmod.h \
     haskellmanager.h \
-    haskelldocument.h \
     optionspage.h \
-    filecache.h \
-    haskelleditorwidget.h \
-    followsymbol.h \
     haskellproject.h \
     haskellbuildconfiguration.h \
     stackbuildstep.h \

@@ -25,12 +25,8 @@
 
 #include "haskelleditorfactory.h"
 
-#include "haskellcompletionassist.h"
 #include "haskellconstants.h"
-#include "haskelldocument.h"
-#include "haskelleditorwidget.h"
 #include "haskellhighlighter.h"
-#include "haskellhoverhandler.h"
 
 #include <texteditor/textdocument.h>
 #include <texteditor/texteditoractionhandler.h>
@@ -47,13 +43,10 @@ HaskellEditorFactory::HaskellEditorFactory()
     addMimeType("text/x-haskell");
     setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection
                             | TextEditor::TextEditorActionHandler::FollowSymbolUnderCursor);
-    addHoverHandler(new HaskellHoverHandler);
-    setDocumentCreator([] { return new HaskellDocument(); });
-    setEditorWidgetCreator([] { return new HaskellEditorWidget; });
+    setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
     setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
     setParenthesesMatchingEnabled(true);
     setMarksVisible(true);
-    setCompletionAssistProvider(new HaskellCompletionAssistProvider);
     setSyntaxHighlighterCreator([] { return new HaskellHighlighter(); });
 }
 

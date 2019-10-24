@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include "haskellconstants.h"
+
 #include <projectexplorer/runconfigurationaspects.h>
 #include <projectexplorer/runcontrol.h>
 
@@ -49,9 +51,11 @@ public:
     HaskellRunConfigurationFactory();
 
 private:
-    ProjectExplorer::SimpleRunWorkerFactory<ProjectExplorer::SimpleTargetRunner,
-                                            HaskellRunConfiguration>
-        runWorkerFactory;
+    ProjectExplorer::RunWorkerFactory runWorkerFactory{
+        ProjectExplorer::RunWorkerFactory::make<ProjectExplorer::SimpleTargetRunner>(),
+        {ProjectExplorer::Constants::NORMAL_RUN_MODE},
+        {Constants::C_HASKELL_RUNCONFIG_ID},
+        {ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE}};
 };
 
 class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect

@@ -25,7 +25,6 @@
 
 #include "haskellrunconfiguration.h"
 
-#include "haskellconstants.h"
 #include "haskellmanager.h"
 #include "haskellproject.h"
 
@@ -43,7 +42,7 @@ namespace Internal {
 
 HaskellRunConfigurationFactory::HaskellRunConfigurationFactory()
 {
-    registerRunConfiguration<HaskellRunConfiguration>("Haskell.RunConfiguration");
+    registerRunConfiguration<HaskellRunConfiguration>(Constants::C_HASKELL_RUNCONFIG_ID);
     addSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     addSupportedTargetDeviceType(ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE);
 }
@@ -96,7 +95,7 @@ Runnable HaskellRunConfiguration::runnable() const
         r.commandLineArguments += " -- " + arguments;
     r.workingDirectory = projectDirectory;
     r.environment = aspect<LocalEnvironmentAspect>()->environment();
-    r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString()).toString();
+    r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString());
     return r;
 }
 
