@@ -36,8 +36,6 @@ QT_END_NAMESPACE
 namespace Haskell {
 namespace Internal {
 
-class AsyncGhcMod;
-
 class HaskellManager : public QObject
 {
     Q_OBJECT
@@ -46,13 +44,10 @@ public:
     static HaskellManager *instance();
 
     static Utils::FilePath findProjectDirectory(const Utils::FilePath &filePath);
-    static std::shared_ptr<AsyncGhcMod> ghcModForFile(const Utils::FilePath &filePath);
     static Utils::FilePath stackExecutable();
     static void setStackExecutable(const Utils::FilePath &filePath);
     static void readSettings(QSettings *settings);
     static void writeSettings(QSettings *settings);
-
-    static QString trLookingUp(const QString &name);
 
 signals:
     void stackExecutableChanged(const Utils::FilePath &filePath);
