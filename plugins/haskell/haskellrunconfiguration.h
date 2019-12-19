@@ -41,7 +41,6 @@ public:
     HaskellRunConfiguration(ProjectExplorer::Target *target, Core::Id id);
 
 private:
-    void doAdditionalSetup(const ProjectExplorer::RunConfigurationCreationInfo &info) final;
     ProjectExplorer::Runnable runnable() const final;
 };
 

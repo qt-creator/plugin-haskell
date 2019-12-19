@@ -25,17 +25,13 @@
 
 #pragma once
 
+#include <projectexplorer/buildsystem.h>
 #include <projectexplorer/project.h>
 #include <projectexplorer/projectnodes.h>
+#include <projectexplorer/treescanner.h>
 
 namespace Haskell {
 namespace Internal {
-
-class HaskellProjectNode : public ProjectExplorer::ProjectNode
-{
-public:
-    HaskellProjectNode(const Utils::FilePath &projectFilePath);
-};
 
 class HaskellProject : public ProjectExplorer::Project
 {
@@ -45,13 +41,24 @@ public:
     explicit HaskellProject(const Utils::FilePath &fileName);
 
     static bool isHaskellProject(Project *project);
+};
+
+class HaskellBuildSystem : public ProjectExplorer::BuildSystem
+{
+    Q_OBJECT
+
+public:
+    HaskellBuildSystem(ProjectExplorer::Target *t);
+
+    void triggerParsing() override;
 
 private:
-    void updateFiles();
-    void updateApplicationTargets(ProjectExplorer::Target *target);
+    void updateApplicationTargets();
     void refresh();
 
+private:
     ParseGuard m_parseGuard;
+    ProjectExplorer::TreeScanner m_scanner;
 };
 
 } // namespace Internal

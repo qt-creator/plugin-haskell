@@ -53,7 +53,6 @@ public:
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     BuildType buildType() const override;
     void setBuildType(BuildType type);
-    void initialize() override;
 
 private:
     BuildType m_buildType = BuildType::Release;

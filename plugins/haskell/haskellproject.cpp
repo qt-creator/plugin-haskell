@@ -65,18 +65,12 @@ static QVector<QString> parseExecutableNames(const FilePath &projectFilePath)
     return result;
 }
 
-HaskellProjectNode::HaskellProjectNode(const FilePath &projectFilePath)
-    : ProjectNode(projectFilePath)
-{}
-
 HaskellProject::HaskellProject(const Utils::FilePath &fileName)
     : Project(Constants::C_HASKELL_PROJECT_MIMETYPE, fileName)
 {
     setId(Constants::C_HASKELL_PROJECT_ID);
     setDisplayName(fileName.toFileInfo().completeBaseName());
-    updateFiles();
-    connect(this, &Project::activeTargetChanged, this, &HaskellProject::updateApplicationTargets);
-    connect(this, &Project::projectFileIsDirty, this, &HaskellProject::refresh);
+    setBuildSystemCreator([](Target *t) { return new HaskellBuildSystem(t); });
 }
 
 bool HaskellProject::isHaskellProject(Project *project)
@@ -84,35 +78,43 @@ bool HaskellProject::isHaskellProject(Project *project)
     return project && project->id() == Constants::C_HASKELL_PROJECT_ID;
 }
 
-void HaskellProject::updateFiles()
+HaskellBuildSystem::HaskellBuildSystem(Target *t)
+    : BuildSystem(t)
 {
-    m_parseGuard = guardParsingRun();
-    FilePath projectDir = projectDirectory();
-    QFuture<QList<FileNode *>> future = Utils::runAsync([this, projectDir] {
-        return FileNode::scanForFiles(projectDir, [this](const FilePath &fn) -> FileNode * {
-            if (fn != FilePath::fromString(projectFilePath().toString() + ".user"))
-                return new FileNode(fn, FileType::Source);
-            else
-                return nullptr;
-        });
-    });
-    Utils::onResultReady(future, this, [this](const QList<FileNode *> &nodes) {
-        auto root = new HaskellProjectNode(projectDirectory());
-        root->setDisplayName(displayName());
+    connect(&m_scanner, &TreeScanner::finished, this, [this] {
+        auto root = std::make_unique<ProjectNode>(projectDirectory());
+        root->setDisplayName(target()->project()->displayName());
         std::vector<std::unique_ptr<FileNode>> nodePtrs
-            = Utils::transform<std::vector>(nodes, [](FileNode *fn) {
+            = Utils::transform<std::vector>(m_scanner.release(), [](FileNode *fn) {
                   return std::unique_ptr<FileNode>(fn);
               });
         root->addNestedNodes(std::move(nodePtrs));
-        setRootProjectNode(std::unique_ptr<ProjectNode>(root));
+        setRootProjectNode(std::move(root));
+
+        updateApplicationTargets();
+
         m_parseGuard.markAsSuccess();
         m_parseGuard = {};
+
+        emitBuildSystemUpdated();
     });
+
+    connect(target()->project(),
+            &Project::projectFileIsDirty,
+            this,
+            &BuildSystem::requestDelayedParse);
+
+    requestDelayedParse();
 }
 
-void HaskellProject::updateApplicationTargets(Target *target)
+void HaskellBuildSystem::triggerParsing()
 {
-    QTC_ASSERT(target, return);
+    m_parseGuard = guardParsingRun();
+    m_scanner.asyncScanForFiles(target()->project()->projectDirectory());
+}
+
+void HaskellBuildSystem::updateApplicationTargets()
+{
     const QVector<QString> executables = parseExecutableNames(projectFilePath());
     const Utils::FilePath projFilePath = projectFilePath();
     const QList<BuildTargetInfo> appTargets
@@ -125,15 +127,8 @@ void HaskellProject::updateApplicationTargets(Target *target)
               bti.isQtcRunnable = true;
               return bti;
           });
-    target->setApplicationTargets(appTargets);
-    target->updateDefaultRunConfigurations();
-}
-
-void HaskellProject::refresh()
-{
-    updateFiles();
-    if (activeTarget())
-        updateApplicationTargets(activeTarget());
+    setApplicationTargets(appTargets);
+    target()->updateDefaultRunConfigurations();
 }
 
 } // namespace Internal

@@ -74,7 +74,16 @@ QList<BuildInfo> HaskellBuildConfigurationFactory::availableBuilds(
 
 HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)
     : BuildConfiguration(target, id)
-{}
+{
+    setInitializer([this](const BuildInfo &info) {
+        setBuildDirectory(info.buildDirectory);
+        setBuildType(info.buildType);
+        setDisplayName(info.displayName);
+
+        auto stackBuildStep = new StackBuildStep(buildSteps());
+        buildSteps()->appendStep(stackBuildStep);
+    });
+}
 
 NamedWidget *HaskellBuildConfiguration::createConfigWidget()
 {
@@ -91,23 +100,10 @@ void HaskellBuildConfiguration::setBuildType(BuildConfiguration::BuildType type)
     m_buildType = type;
 }
 
-void HaskellBuildConfiguration::initialize()
-{
-    BuildConfiguration::initialize();
-    setBuildDirectory(initialBuildDirectory());
-    setBuildType(initialBuildType());
-    setDisplayName(initialDisplayName());
-
-    BuildStepList *buildSteps = stepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
-    auto stackBuildStep = new StackBuildStep(buildSteps);
-    buildSteps->appendStep(stackBuildStep);
-}
-
 HaskellBuildConfigurationWidget::HaskellBuildConfigurationWidget(HaskellBuildConfiguration *bc)
-    : NamedWidget()
+    : NamedWidget(tr("General"))
     , m_buildConfiguration(bc)
 {
-    setDisplayName(tr("General"));
     setLayout(new QVBoxLayout);
     layout()->setMargin(0);
     auto box = new Utils::DetailsWidget;
