@@ -27,7 +27,6 @@
 
 #include "haskellconstants.h"
 #include "haskellproject.h"
-#include "stackbuildstep.h"
 
 #include <projectexplorer/buildinfo.h>
 #include <projectexplorer/buildsteplist.h>
@@ -56,20 +55,18 @@ HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory()
     registerBuildConfiguration<HaskellBuildConfiguration>(C_HASKELL_BUILDCONFIGURATION_ID);
     setSupportedProjectType(Constants::C_HASKELL_PROJECT_ID);
     setSupportedProjectMimeTypeName(Constants::C_HASKELL_PROJECT_MIMETYPE);
-}
 
-QList<BuildInfo> HaskellBuildConfigurationFactory::availableBuilds(
-    const Kit *k, const Utils::FilePath &projectPath, bool forSetup) const
-{
-    BuildInfo info(this);
-    info.typeName = HaskellBuildConfigurationFactory::tr("Release");
-    if (forSetup) {
-        info.displayName = info.typeName;
-        info.buildDirectory = projectPath.parentDir().pathAppended(".stack-work");
-    }
-    info.kitId = k->id();
-    info.buildType = BuildConfiguration::BuildType::Release;
-    return {info};
+    setBuildGenerator([](const Kit *k, const Utils::FilePath &projectPath, bool forSetup)  {
+        BuildInfo info;
+        info.typeName = HaskellBuildConfiguration::tr("Release");
+        if (forSetup) {
+            info.displayName = info.typeName;
+            info.buildDirectory = projectPath.parentDir().pathAppended(".stack-work");
+        }
+        info.kitId = k->id();
+        info.buildType = BuildConfiguration::BuildType::Release;
+        return QList<BuildInfo>{info};
+    });
 }
 
 HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)
@@ -79,10 +76,8 @@ HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id
         setBuildDirectory(info.buildDirectory);
         setBuildType(info.buildType);
         setDisplayName(info.displayName);
-
-        auto stackBuildStep = new StackBuildStep(buildSteps());
-        buildSteps()->appendStep(stackBuildStep);
     });
+    appendInitialBuildStep(Constants::C_STACK_BUILD_STEP_ID);
 }
 
 NamedWidget *HaskellBuildConfiguration::createConfigWidget()

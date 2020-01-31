@@ -35,7 +35,7 @@ class StackBuildStep : public ProjectExplorer::AbstractProcessStep
     Q_OBJECT
 
 public:
-    StackBuildStep(ProjectExplorer::BuildStepList *bsl);
+    StackBuildStep(ProjectExplorer::BuildStepList *bsl, Core::Id id);
 
     ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
 

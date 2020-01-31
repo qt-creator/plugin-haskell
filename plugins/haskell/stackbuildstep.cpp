@@ -25,6 +25,7 @@
 
 #include "stackbuildstep.h"
 
+#include "haskellconstants.h"
 #include "haskellmanager.h"
 
 #include <projectexplorer/buildconfiguration.h>
@@ -34,13 +35,11 @@
 
 using namespace ProjectExplorer;
 
-const char C_STACK_BUILD_STEP_ID[] = "Haskell.Stack.Build";
-
 namespace Haskell {
 namespace Internal {
 
-StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl)
-    : AbstractProcessStep(bsl, C_STACK_BUILD_STEP_ID)
+StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl, Core::Id id)
+    : AbstractProcessStep(bsl, id)
 {
     setDefaultDisplayName(trDisplayName());
 
@@ -81,7 +80,7 @@ QString StackBuildStep::trDisplayName()
 
 StackBuildStepFactory::StackBuildStepFactory()
 {
-    registerStep<StackBuildStep>(C_STACK_BUILD_STEP_ID);
+    registerStep<StackBuildStep>(Constants::C_STACK_BUILD_STEP_ID);
     setDisplayName(StackBuildStep::StackBuildStep::trDisplayName());
     setSupportedStepList(ProjectExplorer::Constants::BUILDSTEPS_BUILD);
 }

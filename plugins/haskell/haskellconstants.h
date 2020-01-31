@@ -33,6 +33,7 @@ const char C_HASKELLSNIPPETSGROUP_ID[] = "Haskell";
 const char C_HASKELL_PROJECT_MIMETYPE[] = "text/x-haskell-project";
 const char C_HASKELL_PROJECT_ID[] = "Haskell.Project";
 const char C_HASKELL_RUNCONFIG_ID[] = "Haskell.RunConfiguration";
+const char C_STACK_BUILD_STEP_ID[] = "Haskell.Stack.Build";
 const char OPTIONS_GENERAL[] = "Haskell.A.General";
 
 } // namespace Haskell

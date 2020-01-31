@@ -33,14 +33,8 @@ namespace Internal {
 
 class HaskellBuildConfigurationFactory : public ProjectExplorer::BuildConfigurationFactory
 {
-    Q_OBJECT
-
 public:
     HaskellBuildConfigurationFactory();
-
-    QList<ProjectExplorer::BuildInfo> availableBuilds(const ProjectExplorer::Kit *k,
-                                                      const Utils::FilePath &projectPath,
-                                                      bool forSetup) const override;
 };
 
 class HaskellBuildConfiguration : public ProjectExplorer::BuildConfiguration
