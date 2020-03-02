@@ -27,7 +27,9 @@
 
 #include "haskellconstants.h"
 #include "haskellhighlighter.h"
+#include "haskellmanager.h"
 
+#include <coreplugin/actionmanager/commandbutton.h>
 #include <texteditor/textdocument.h>
 #include <texteditor/texteditoractionhandler.h>
 
@@ -35,6 +37,18 @@
 
 namespace Haskell {
 namespace Internal {
+
+static QWidget *createEditorWidget()
+{
+    auto widget = new TextEditor::TextEditorWidget;
+    auto ghciButton = new Core::CommandButton(Constants::A_RUN_GHCI, widget);
+    ghciButton->setText(HaskellManager::tr("GHCi"));
+    QObject::connect(ghciButton, &QToolButton::clicked, HaskellManager::instance(), [widget] {
+        HaskellManager::openGhci(widget->textDocument()->filePath());
+    });
+    widget->insertExtraToolBarWidget(TextEditor::TextEditorWidget::Left, ghciButton);
+    return widget;
+}
 
 HaskellEditorFactory::HaskellEditorFactory()
 {
@@ -44,6 +58,7 @@ HaskellEditorFactory::HaskellEditorFactory()
     setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection
                             | TextEditor::TextEditorActionHandler::FollowSymbolUnderCursor);
     setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
+    setEditorWidgetCreator(createEditorWidget);
     setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
     setParenthesesMatchingEnabled(true);
     setMarksVisible(true);
