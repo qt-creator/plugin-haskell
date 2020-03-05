@@ -25,7 +25,11 @@
 
 #include "haskellmanager.h"
 
+#include <coreplugin/messagemanager.h>
+#include <utils/algorithm.h>
+#include <utils/consoleprocess.h>
 #include <utils/hostosinfo.h>
+#include <utils/mimetypes/mimedatabase.h>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -91,6 +95,25 @@ void HaskellManager::setStackExecutable(const FilePath &filePath)
         return;
     m_d->stackExecutable = filePath;
     emit m_instance->stackExecutableChanged(m_d->stackExecutable);
+}
+
+void HaskellManager::openGhci(const FilePath &haskellFile)
+{
+    const QList<MimeType> mimeTypes = mimeTypesForFileName(haskellFile.toString());
+    const bool isHaskell = Utils::anyOf(mimeTypes, [](const MimeType &mt) {
+        return mt.inherits("text/x-haskell") || mt.inherits("text/x-literate-haskell");
+    });
+    const auto args = QStringList{"ghci"}
+                      + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
+    auto p = new ConsoleProcess;
+    p->setCommand({stackExecutable(), args});
+    p->setWorkingDirectory(haskellFile.toFileInfo().path());
+    connect(p, &ConsoleProcess::processError, p, [p](const QString &errorString) {
+        Core::MessageManager::write(tr("Failed to run GHCi: \"%1\".").arg(errorString));
+        p->deleteLater();
+    });
+    connect(p, &ConsoleProcess::stubStopped, p, &QObject::deleteLater);
+    p->start();
 }
 
 void HaskellManager::readSettings(QSettings *settings)

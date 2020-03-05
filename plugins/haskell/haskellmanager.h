@@ -46,6 +46,7 @@ public:
     static Utils::FilePath findProjectDirectory(const Utils::FilePath &filePath);
     static Utils::FilePath stackExecutable();
     static void setStackExecutable(const Utils::FilePath &filePath);
+    static void openGhci(const Utils::FilePath &haskellFile);
     static void readSettings(QSettings *settings);
     static void writeSettings(QSettings *settings);
 
