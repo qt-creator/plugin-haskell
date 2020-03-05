@@ -32,6 +32,7 @@
 #include <coreplugin/actionmanager/commandbutton.h>
 #include <texteditor/textdocument.h>
 #include <texteditor/texteditoractionhandler.h>
+#include <texteditor/textindenter.h>
 
 #include <QCoreApplication>
 
@@ -58,6 +59,7 @@ HaskellEditorFactory::HaskellEditorFactory()
     setEditorActionHandlers(TextEditor::TextEditorActionHandler::UnCommentSelection
                             | TextEditor::TextEditorActionHandler::FollowSymbolUnderCursor);
     setDocumentCreator([] { return new TextEditor::TextDocument(Constants::C_HASKELLEDITOR_ID); });
+    setIndenterCreator([](QTextDocument *doc) { return new TextEditor::TextIndenter(doc); });
     setEditorWidgetCreator(createEditorWidget);
     setCommentDefinition(Utils::CommentDefinition("--", "{-", "-}"));
     setParenthesesMatchingEnabled(true);
