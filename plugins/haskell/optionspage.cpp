@@ -73,7 +73,7 @@ void OptionsPage::apply()
 {
     if (!m_widget)
         return;
-    HaskellManager::setStackExecutable(m_stackPath->rawFileName());
+    HaskellManager::setStackExecutable(m_stackPath->rawFilePath());
 }
 
 void OptionsPage::finish()
