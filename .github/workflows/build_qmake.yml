@@ -3,9 +3,9 @@ name: QMake Build Matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.14.1
-  QT_CREATOR_VERSION: 4.12.0
-  QT_CREATOR_SNAPSHOT: NO
+  QT_VERSION: 5.14.2
+  QT_CREATOR_VERSION: 4.13.0-beta1
+  QT_CREATOR_SNAPSHOT: latest
   PLUGIN_PRO: haskell.pro
   PLUGIN_NAME: Haskell
 
@@ -45,6 +45,12 @@ jobs:
           execute_process(
             COMMAND sudo apt install libgl1-mesa-dev
           )
+        endif()
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          # get JOM
+          file(DOWNLOAD "https://download.qt.io/official_releases/jom/jom.zip" ./jom.zip SHOW_PROGRESS)
+          file(MAKE_DIRECTORY ./jom)
+          execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ../jom.zip WORKING_DIRECTORY ./jom)
         endif()
 
     - name: Download Qt
@@ -126,14 +132,14 @@ jobs:
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
           set(qtc_binary_name "$ENV{PLUGIN_NAME}4.dll")
           if ("${{ matrix.config.environment_script }}" MATCHES "vcvars64.bat")
-            set(qtc_platform "windows_msvc2017_x64")
+            set(qtc_platform "windows_x64")
           elseif ("${{ matrix.config.environment_script }}" MATCHES "vcvars32.bat")
-            set(qtc_platform "windows_msvc2017_x86")
+            set(qtc_platform "windows_x86")
           endif()
         elseif ("${{ runner.os }}" STREQUAL "Linux")
           set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
           set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.so")
-          set(qtc_platform "linux_gcc_64_rhel72")
+          set(qtc_platform "linux_x64")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
           set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
           set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.dylib")
@@ -210,7 +216,7 @@ jobs:
 
         set(make_program make -j ${N})
         if ("${{ runner.os }}" STREQUAL "Windows")
-          set(make_program "qtcreator/bin/jom")
+          set(make_program "jom/jom")
         endif()
 
         execute_process(
