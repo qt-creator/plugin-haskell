@@ -69,7 +69,7 @@ HaskellBuildConfigurationFactory::HaskellBuildConfigurationFactory()
     });
 }
 
-HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Core::Id id)
+HaskellBuildConfiguration::HaskellBuildConfiguration(Target *target, Utils::Id id)
     : BuildConfiguration(target, id)
 {
     setInitializer([this](const BuildInfo &info) {

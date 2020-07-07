@@ -38,7 +38,7 @@ class HaskellRunConfiguration : public ProjectExplorer::RunConfiguration
     Q_OBJECT
 
 public:
-    HaskellRunConfiguration(ProjectExplorer::Target *target, Core::Id id);
+    HaskellRunConfiguration(ProjectExplorer::Target *target, Utils::Id id);
 
 private:
     ProjectExplorer::Runnable runnable() const final;

@@ -38,7 +38,7 @@ using namespace ProjectExplorer;
 namespace Haskell {
 namespace Internal {
 
-StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl, Core::Id id)
+StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl, Utils::Id id)
     : AbstractProcessStep(bsl, id)
 {
     setDefaultDisplayName(trDisplayName());
