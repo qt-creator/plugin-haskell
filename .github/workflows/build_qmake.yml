@@ -129,7 +129,7 @@ jobs:
         endif()
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
+          set(qtc_output_directory "target/lib/qtcreator/plugins")
           set(qtc_binary_name "$ENV{PLUGIN_NAME}4.dll")
           if ("${{ matrix.config.environment_script }}" MATCHES "vcvars64.bat")
             set(qtc_platform "windows_x64")
@@ -137,11 +137,11 @@ jobs:
             set(qtc_platform "windows_x86")
           endif()
         elseif ("${{ runner.os }}" STREQUAL "Linux")
-          set(qtc_output_directory "qtcreator/lib/qtcreator/plugins")
+          set(qtc_output_directory "target/lib/qtcreator/plugins")
           set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.so")
           set(qtc_platform "linux_x64")
         elseif ("${{ runner.os }}" STREQUAL "macOS")
-          set(qtc_output_directory "qtcreator/bin/Qt Creator.app/Contents/PlugIns")
+          set(qtc_output_directory "target/PlugIns")
           set(qtc_binary_name "lib$ENV{PLUGIN_NAME}.dylib")
           set(qtc_platform "mac_x64")
         endif()
@@ -158,15 +158,6 @@ jobs:
           execute_process(COMMAND
             ${CMAKE_COMMAND} -E tar xvf ../${package}.7z WORKING_DIRECTORY qtcreator)
         endforeach()
-
-        if ("${{ runner.os }}" STREQUAL "macOS")
-          execute_process(
-            COMMAND ${CMAKE_COMMAND} -E make_directory qtcreator/bin
-            COMMAND ${CMAKE_COMMAND} -E create_symlink
-              "$ENV{GITHUB_WORKSPACE}/qtcreator/Qt Creator.app"
-              "$ENV{GITHUB_WORKSPACE}/qtcreator/bin/Qt Creator.app"
-          )
-        endif()
 
     - name: Configure
       shell: cmake -P {0}
@@ -187,14 +178,21 @@ jobs:
           endforeach()
         endif()
 
-        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qtcreator" qtcreator_dir)
+        if ("${{ runner.os }}" STREQUAL "macOS")
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qtcreator/Qt Creator.app" qtcreator_build)
+        else()
+          file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qtcreator" qtcreator_build)
+        endif()
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/qtcreator" qtcreator_source)
+        file(TO_CMAKE_PATH "$ENV{GITHUB_WORKSPACE}/target" target_path)
 
         execute_process(
           COMMAND ${{ steps.qt.outputs.qt_dir }}/bin/qmake
             $ENV{PLUGIN_PRO}
             CONFIG+=release
-            IDE_SOURCE_TREE="${qtcreator_dir}"
-            IDE_BUILD_TREE="${qtcreator_dir}"
+            IDE_SOURCE_TREE="${qtcreator_source}"
+            IDE_BUILD_TREE="${qtcreator_build}"
+            IDE_OUTPUT_PATH="${target_path}"
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)

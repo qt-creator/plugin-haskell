@@ -42,7 +42,7 @@ class HaskellBuildConfiguration : public ProjectExplorer::BuildConfiguration
     Q_OBJECT
 
 public:
-    HaskellBuildConfiguration(ProjectExplorer::Target *target, Core::Id id);
+    HaskellBuildConfiguration(ProjectExplorer::Target *target, Utils::Id id);
 
     ProjectExplorer::NamedWidget *createConfigWidget() override;
     BuildType buildType() const override;

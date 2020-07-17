@@ -53,7 +53,7 @@ HaskellExecutableAspect::HaskellExecutableAspect()
     setLabelText(tr("Executable"));
 }
 
-HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Core::Id id)
+HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Utils::Id id)
     : RunConfiguration(target, id)
 {
     addAspect<LocalEnvironmentAspect>(target);
