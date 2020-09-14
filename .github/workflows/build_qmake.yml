@@ -3,9 +3,9 @@ name: QMake Build Matrix
 on: [push]
 
 env:
-  QT_VERSION: 5.14.2
-  QT_CREATOR_VERSION: 4.13.0-beta1
-  QT_CREATOR_SNAPSHOT: latest
+  QT_VERSION: 5.15.0
+  QT_CREATOR_VERSION: 4.13.0
+  QT_CREATOR_SNAPSHOT: NO
   PLUGIN_PRO: haskell.pro
   PLUGIN_NAME: Haskell
 
@@ -63,11 +63,11 @@ jobs:
         if ("${{ runner.os }}" STREQUAL "Windows")
           set(url_os "windows_x86")
           if ("${{ matrix.config.environment_script }}" MATCHES "vcvars64.bat")
-            set(qt_package_name "qt.qt5.${qt_version_dotless}.win64_msvc2017_64")
-            set(qt_dir_prefix "${qt_version}/msvc2017_64")
+            set(qt_package_name "qt.qt5.${qt_version_dotless}.win64_msvc2019_64")
+            set(qt_dir_prefix "${qt_version}/msvc2019_64")
           elseif ("${{ matrix.config.environment_script }}" MATCHES "vcvars32.bat")
-            set(qt_package_name "qt.qt5.${qt_version_dotless}.win32_msvc2017")
-            set(qt_dir_prefix "${qt_version}/msvc2017")
+            set(qt_package_name "qt.qt5.${qt_version_dotless}.win32_msvc2019")
+            set(qt_dir_prefix "${qt_version}/msvc2019")
           else()
           endif()
         elseif ("${{ runner.os }}" STREQUAL "Linux")
