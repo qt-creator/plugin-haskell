@@ -29,6 +29,7 @@
 
 #include <projectexplorer/runconfigurationaspects.h>
 #include <projectexplorer/runcontrol.h>
+#include <utils/aspects.h>
 
 namespace Haskell {
 namespace Internal {
@@ -57,7 +58,7 @@ private:
         {ProjectExplorer::Constants::DESKTOP_DEVICE_TYPE}};
 };
 
-class HaskellExecutableAspect : public ProjectExplorer::BaseStringAspect
+class HaskellExecutableAspect : public Utils::StringAspect
 {
     Q_OBJECT
 

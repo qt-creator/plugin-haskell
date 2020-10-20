@@ -68,9 +68,9 @@ StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl, Utils::Id id
     connect(buildConfiguration(), &BuildConfiguration::environmentChanged, this, updateEnvironment);
 }
 
-BuildStepConfigWidget *StackBuildStep::createConfigWidget()
+QWidget *StackBuildStep::createConfigWidget()
 {
-    return new BuildStepConfigWidget(this);
+    return new QWidget;
 }
 
 QString StackBuildStep::trDisplayName()

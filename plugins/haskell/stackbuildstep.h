@@ -37,7 +37,7 @@ class StackBuildStep : public ProjectExplorer::AbstractProcessStep
 public:
     StackBuildStep(ProjectExplorer::BuildStepList *bsl, Utils::Id id);
 
-    ProjectExplorer::BuildStepConfigWidget *createConfigWidget() override;
+    QWidget *createConfigWidget() override;
 
     static QString trDisplayName();
 };
