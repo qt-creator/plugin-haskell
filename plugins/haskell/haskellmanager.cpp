@@ -109,7 +109,7 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.toFileInfo().path());
     connect(p, &ConsoleProcess::processError, p, [p](const QString &errorString) {
-        Core::MessageManager::write(tr("Failed to run GHCi: \"%1\".").arg(errorString));
+        Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(errorString));
         p->deleteLater();
     });
     connect(p, &ConsoleProcess::stubStopped, p, &QObject::deleteLater);
