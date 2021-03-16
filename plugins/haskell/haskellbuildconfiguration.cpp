@@ -112,14 +112,14 @@ HaskellBuildConfigurationWidget::HaskellBuildConfigurationWidget(HaskellBuildCon
 
     auto buildDirectoryInput = new Utils::PathChooser;
     buildDirectoryInput->setExpectedKind(Utils::PathChooser::Directory);
-    buildDirectoryInput->setFileName(m_buildConfiguration->buildDirectory());
+    buildDirectoryInput->setFilePath(m_buildConfiguration->buildDirectory());
     details->layout()->addWidget(buildDirectoryInput);
 
     connect(m_buildConfiguration,
             &BuildConfiguration::buildDirectoryChanged,
             buildDirectoryInput,
             [this, buildDirectoryInput] {
-                buildDirectoryInput->setFileName(m_buildConfiguration->buildDirectory());
+                buildDirectoryInput->setFilePath(m_buildConfiguration->buildDirectory());
             });
     connect(buildDirectoryInput,
             &Utils::PathChooser::pathChanged,
