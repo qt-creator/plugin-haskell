@@ -62,7 +62,7 @@ QWidget *OptionsPage::widget()
         m_stackPath = new PathChooser();
         m_stackPath->setExpectedKind(PathChooser::ExistingCommand);
         m_stackPath->setPromptDialogTitle(tr("Choose Stack Executable"));
-        m_stackPath->setFileName(HaskellManager::stackExecutable());
+        m_stackPath->setFilePath(HaskellManager::stackExecutable());
         m_stackPath->setCommandVersionArguments({"--version"});
         boxLayout->addWidget(m_stackPath);
     }
