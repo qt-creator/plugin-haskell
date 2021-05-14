@@ -27,6 +27,7 @@
 
 #include <coreplugin/messagemanager.h>
 #include <utils/algorithm.h>
+#include <utils/commandline.h>
 #include <utils/consoleprocess.h>
 #include <utils/hostosinfo.h>
 #include <utils/mimetypes/mimedatabase.h>
