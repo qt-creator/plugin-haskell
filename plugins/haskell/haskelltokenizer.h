@@ -61,7 +61,7 @@ public:
     TokenType type = TokenType::Unknown;
     int startCol = -1;
     int length = -1;
-    QStringRef text;
+    QStringView text;
 
     std::shared_ptr<QString> source; // keep the string ref alive
 };
