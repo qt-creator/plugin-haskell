@@ -80,10 +80,10 @@ void HaskellHighlighter::highlightBlock(const QString &text)
             setTokenFormat(token, C_VISUAL_WHITESPACE);
             break;
         case TokenType::Keyword:
-            if (token.text == "::" && firstNonWS && !secondNonWS) { // toplevel declaration
+            if (token.text == QLatin1String("::") && firstNonWS && !secondNonWS) { // toplevel declaration
                 setFormat(firstNonWS->startCol, firstNonWS->length, m_toplevelDeclFormat);
                 inType = true;
-            } else if (token.text == "import") {
+            } else if (token.text == QLatin1String("import")) {
                 inImport = true;
             }
             setTokenFormat(token, C_KEYWORD);

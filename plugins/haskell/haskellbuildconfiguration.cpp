@@ -100,14 +100,14 @@ HaskellBuildConfigurationWidget::HaskellBuildConfigurationWidget(HaskellBuildCon
     , m_buildConfiguration(bc)
 {
     setLayout(new QVBoxLayout);
-    layout()->setMargin(0);
+    layout()->setContentsMargins(0, 0, 0, 0);
     auto box = new Utils::DetailsWidget;
     box->setState(Utils::DetailsWidget::NoSummary);
     layout()->addWidget(box);
     auto details = new QWidget;
     box->setWidget(details);
     details->setLayout(new QHBoxLayout);
-    details->layout()->setMargin(0);
+    details->layout()->setContentsMargins(0, 0, 0, 0);
     details->layout()->addWidget(new QLabel(tr("Build directory:")));
 
     auto buildDirectoryInput = new Utils::PathChooser;

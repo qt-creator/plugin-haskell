@@ -142,7 +142,7 @@ namespace Internal {
 
 Token token(TokenType type, std::shared_ptr<QString> line, int start, int end)
 {
-    return {type, start, end - start, line->midRef(start, end - start), line};
+    return {type, start, end - start, QStringView(*line).mid(start, end - start), line};
 }
 
 Tokens::Tokens(std::shared_ptr<QString> source)
@@ -251,7 +251,7 @@ static QVector<Token> getSpace(std::shared_ptr<QString> line, int start)
         ++current;
     const int length = int(std::distance(tokenStart, current));
     if (current > tokenStart)
-        return {{TokenType::Whitespace, start, length, line->midRef(start, length), line}};
+        return {{TokenType::Whitespace, start, length, QStringView(*line).mid(start, length), line}};
     return {};
 }
 
@@ -405,7 +405,7 @@ static int getEscape(const QString &line, int start)
             return 0;
         return count + 1;
     }
-    const QStringRef s = line.midRef(start);
+    const QStringView s = QStringView(line).mid(start);
     for (const QString &esc : *ASCII_ESCAPES) {
         if (s.startsWith(esc))
             return esc.length();
@@ -481,7 +481,7 @@ static QVector<Token> getString(std::shared_ptr<QString> line, int start, bool *
                 lastRef.type = TokenType::StringError;
             } else {
                 --lastRef.length;
-                lastRef.text = line->midRef(lastRef.startCol, lastRef.length);
+                lastRef.text = QStringView(*line).mid(lastRef.startCol, lastRef.length);
                 result.append(token(TokenType::StringError, line, current - 1, current));
             }
         }
@@ -496,11 +496,11 @@ static QVector<Token> getMultiLineComment(std::shared_ptr<QString> line, int sta
     const int length = line->length();
     int current = start;
     do {
-        const QStringRef test = line->midRef(current, 2);
-        if (test == "{-") {
+        const QStringView test = QStringView(*line).mid(current, 2);
+        if (test == QLatin1String("{-")) {
             ++(*commentLevel);
             current += 2;
-        } else if (test == "-}" && *commentLevel > 0) {
+        } else if (test == QLatin1String("-}") && *commentLevel > 0) {
             --(*commentLevel);
             current += 2;
         } else if (*commentLevel > 0) {
@@ -587,7 +587,7 @@ static QVector<Token> getChar(std::shared_ptr<QString> line, int start)
 static QVector<Token> getSpecial(std::shared_ptr<QString> line, int start)
 {
     if (SPECIAL->contains(line->at(start)))
-        return {{TokenType::Special, start, 1, line->midRef(start, 1), line}};
+        return {{TokenType::Special, start, 1, QStringView(*line).mid(start, 1), line}};
     return {};
 }
 
@@ -620,7 +620,7 @@ Tokens HaskellTokenizer::tokenize(const QString &line, int startState)
             tokens = {{TokenType::Unknown,
                        currentStart,
                        1,
-                       result.source->midRef(currentStart, 1),
+                       QStringView(*result.source).mid(currentStart, 1),
                        result.source}};
             result.append(tokens);
         }
