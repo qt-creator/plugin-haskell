@@ -74,11 +74,11 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Utils::Id id)
 
 Runnable HaskellRunConfiguration::runnable() const
 {
-    const QString projectDirectory = target()->project()->projectDirectory().toString();
+    const Utils::FilePath projectDirectory = target()->project()->projectDirectory();
     Runnable r;
     if (BuildConfiguration *buildConfiguration = target()->activeBuildConfiguration())
         r.commandLineArguments += "--work-dir \""
-                                  + QDir(projectDirectory)
+                                  + QDir(projectDirectory.toString())
                                         .relativeFilePath(
                                             buildConfiguration->buildDirectory().toString())
                                   + "\" ";

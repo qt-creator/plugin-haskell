@@ -108,7 +108,7 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
                       + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
     auto p = new ConsoleProcess;
     p->setCommand({stackExecutable(), args});
-    p->setWorkingDirectory(haskellFile.toFileInfo().path());
+    p->setWorkingDirectory(haskellFile.absolutePath());
     connect(p, &ConsoleProcess::processError, p, [p](const QString &errorString) {
         Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(errorString));
         p->deleteLater();
