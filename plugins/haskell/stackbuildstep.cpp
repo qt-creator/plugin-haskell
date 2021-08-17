@@ -42,30 +42,6 @@ StackBuildStep::StackBuildStep(ProjectExplorer::BuildStepList *bsl, Utils::Id id
     : AbstractProcessStep(bsl, id)
 {
     setDefaultDisplayName(trDisplayName());
-
-    const auto updateCommandLine = [this] {
-        const auto projectDir = QDir(project()->projectDirectory().toString());
-        processParameters()->setCommandLine(
-            {HaskellManager::stackExecutable(),
-             {"build",
-              "--work-dir",
-              projectDir.relativeFilePath(buildConfiguration()->buildDirectory().toString())}});
-    };
-    const auto updateEnvironment = [this] {
-        processParameters()->setEnvironment(buildConfiguration()->environment());
-    };
-    updateCommandLine();
-    processParameters()->setWorkingDirectory(project()->projectDirectory());
-    updateEnvironment();
-    connect(HaskellManager::instance(),
-            &HaskellManager::stackExecutableChanged,
-            this,
-            updateCommandLine);
-    connect(buildConfiguration(),
-            &BuildConfiguration::buildDirectoryChanged,
-            this,
-            updateCommandLine);
-    connect(buildConfiguration(), &BuildConfiguration::environmentChanged, this, updateEnvironment);
 }
 
 QWidget *StackBuildStep::createConfigWidget()
@@ -76,6 +52,18 @@ QWidget *StackBuildStep::createConfigWidget()
 QString StackBuildStep::trDisplayName()
 {
     return tr("Stack Build");
+}
+
+bool StackBuildStep::init()
+{
+    if (AbstractProcessStep::init()) {
+        const auto projectDir = QDir(project()->projectDirectory().toString());
+        processParameters()->setCommandLine(
+            {HaskellManager::stackExecutable(),
+             {"build", "--work-dir", projectDir.relativeFilePath(buildDirectory().toString())}});
+        processParameters()->setEnvironment(buildEnvironment());
+    }
+    return true;
 }
 
 StackBuildStepFactory::StackBuildStepFactory()
