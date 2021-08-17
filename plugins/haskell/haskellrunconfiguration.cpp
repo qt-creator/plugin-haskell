@@ -76,20 +76,20 @@ Runnable HaskellRunConfiguration::runnable() const
 {
     const Utils::FilePath projectDirectory = target()->project()->projectDirectory();
     Runnable r;
-    if (BuildConfiguration *buildConfiguration = target()->activeBuildConfiguration())
-        r.commandLineArguments += "--work-dir \""
-                                  + QDir(projectDirectory.toString())
-                                        .relativeFilePath(
-                                            buildConfiguration->buildDirectory().toString())
-                                  + "\" ";
-    const QString executable = aspect<HaskellExecutableAspect>()->value();
-    r.commandLineArguments += "exec \"" + executable + "\"";
+    QStringList args;
+    if (BuildConfiguration *buildConfiguration = target()->activeBuildConfiguration()) {
+        args << "--work-dir"
+             << QDir(projectDirectory.toString()).relativeFilePath(
+                    buildConfiguration->buildDirectory().toString());
+    }
+    args << "exec" << aspect<HaskellExecutableAspect>()->value();
     const QString arguments = aspect<ArgumentsAspect>()->arguments(macroExpander());
     if (!arguments.isEmpty())
-        r.commandLineArguments += " -- " + arguments;
+        args << "--" << arguments;
+
     r.workingDirectory = projectDirectory;
     r.environment = aspect<LocalEnvironmentAspect>()->environment();
-    r.executable = r.environment.searchInPath(HaskellManager::stackExecutable().toString());
+    r.command = {r.environment.searchInPath(HaskellManager::stackExecutable().toString()), args};
     return r;
 }
 
