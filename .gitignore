@@ -1,1 +1,3 @@
 .stack-work
+CMakeLists.txt.user*
+/build*/
