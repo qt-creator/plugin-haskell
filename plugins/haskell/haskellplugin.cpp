@@ -38,6 +38,7 @@
 #include <coreplugin/editormanager/editormanager.h>
 #include <coreplugin/icore.h>
 #include <projectexplorer/projectmanager.h>
+#include <projectexplorer/jsonwizard/jsonwizardfactory.h>
 #include <texteditor/snippets/snippetprovider.h>
 
 #include <QAction>
@@ -89,6 +90,8 @@ bool HaskellPlugin::initialize(const QStringList &arguments, QString *errorStrin
     registerGhciAction();
 
     HaskellManager::readSettings(Core::ICore::settings());
+
+    ProjectExplorer::JsonWizardFactory::addWizardPath(":/haskell/share/wizards/");
     return true;
 }
 

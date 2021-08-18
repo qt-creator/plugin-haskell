@@ -20,3 +20,11 @@ add_qtc_plugin(Haskell
     optionspage.cpp optionspage.h
     stackbuildstep.cpp stackbuildstep.h
 )
+
+qtc_add_resources(Haskell haskell_wizards
+  PREFIX "/haskell"
+  BASE   share/wizards
+  FILES
+    module/file.hs
+    module/wizard.json
+)
