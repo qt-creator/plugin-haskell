@@ -40,6 +40,9 @@ public:
     QWidget *createConfigWidget() override;
 
     static QString trDisplayName();
+
+protected:
+    bool init() override;
 };
 
 class StackBuildStepFactory : public ProjectExplorer::BuildStepFactory
