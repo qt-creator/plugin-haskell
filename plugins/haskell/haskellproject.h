@@ -51,6 +51,7 @@ public:
     HaskellBuildSystem(ProjectExplorer::Target *t);
 
     void triggerParsing() override;
+    QString name() const final { return QLatin1String("haskell"); }
 
 private:
     void updateApplicationTargets();
