@@ -106,14 +106,14 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     });
     const auto args = QStringList{"ghci"}
                       + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
-    auto p = new ConsoleProcess;
+    auto p = new ConsoleProcess(this);
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.absolutePath());
-    connect(p, &ConsoleProcess::processError, p, [p](const QString &errorString) {
-        Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(errorString));
+    connect(p, &ConsoleProcess::errorOccurred, p, [p] {
+        Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(p->errorString()));
         p->deleteLater();
     });
-    connect(p, &ConsoleProcess::stubStopped, p, &QObject::deleteLater);
+    connect(p, &ConsoleProcess::finished, p, &QObject::deleteLater);
     p->start();
 }
 
