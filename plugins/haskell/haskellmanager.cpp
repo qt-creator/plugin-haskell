@@ -28,9 +28,9 @@
 #include <coreplugin/messagemanager.h>
 #include <utils/algorithm.h>
 #include <utils/commandline.h>
-#include <utils/consoleprocess.h>
 #include <utils/hostosinfo.h>
 #include <utils/mimetypes/mimedatabase.h>
+#include <utils/qtcprocess.h>
 
 #include <QCoreApplication>
 #include <QDir>
@@ -106,14 +106,14 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     });
     const auto args = QStringList{"ghci"}
                       + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
-    auto p = new ConsoleProcess(m_instance);
+    auto p = new QtcProcess(QtcProcess::TerminalOn, m_instance);
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.absolutePath());
-    connect(p, &ConsoleProcess::errorOccurred, p, [p] {
+    connect(p, &QtcProcess::errorOccurred, p, [p] {
         Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(p->errorString()));
         p->deleteLater();
     });
-    connect(p, &ConsoleProcess::finished, p, &QObject::deleteLater);
+    connect(p, &QtcProcess::finished, p, &QObject::deleteLater);
     p->start();
 }
 
