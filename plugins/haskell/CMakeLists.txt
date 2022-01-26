@@ -1,6 +1,3 @@
-find_package(QtCreator COMPONENTS Core TextEditor ProjectExplorer REQUIRED)
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
-
 add_qtc_plugin(Haskell
   PLUGIN_DEPENDS
     QtCreator::Core QtCreator::TextEditor QtCreator::ProjectExplorer
