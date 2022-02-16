@@ -106,7 +106,8 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     });
     const auto args = QStringList{"ghci"}
                       + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
-    auto p = new QtcProcess(QtcProcess::TerminalOn, m_instance);
+    auto p = new QtcProcess(m_instance);
+    p->setTerminalMode(QtcProcess::TerminalOn);
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.absolutePath());
     connect(p, &QtcProcess::errorOccurred, p, [p] {
