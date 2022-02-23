@@ -30,6 +30,7 @@
 #include <utils/commandline.h>
 #include <utils/hostosinfo.h>
 #include <utils/mimetypes/mimedatabase.h>
+#include <utils/processenums.h>
 #include <utils/qtcprocess.h>
 
 #include <QCoreApplication>
@@ -107,7 +108,7 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     const auto args = QStringList{"ghci"}
                       + (isHaskell ? QStringList{haskellFile.fileName()} : QStringList());
     auto p = new QtcProcess(m_instance);
-    p->setTerminalMode(QtcProcess::TerminalOn);
+    p->setTerminalMode(TerminalMode::On);
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.absolutePath());
     connect(p, &QtcProcess::errorOccurred, p, [p] {
