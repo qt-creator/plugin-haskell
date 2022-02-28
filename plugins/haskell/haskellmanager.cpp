@@ -29,7 +29,7 @@
 #include <utils/algorithm.h>
 #include <utils/commandline.h>
 #include <utils/hostosinfo.h>
-#include <utils/mimetypes/mimedatabase.h>
+#include <utils/mimeutils.h>
 #include <utils/processenums.h>
 #include <utils/qtcprocess.h>
 
