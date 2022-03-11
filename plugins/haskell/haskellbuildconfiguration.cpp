@@ -35,7 +35,7 @@
 #include <projectexplorer/target.h>
 #include <utils/algorithm.h>
 #include <utils/detailswidget.h>
-#include <utils/mimetypes/mimedatabase.h>
+#include <utils/mimeutils.h>
 #include <utils/pathchooser.h>
 #include <utils/qtcassert.h>
 
