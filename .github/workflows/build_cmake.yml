@@ -217,6 +217,10 @@ jobs:
           endforeach()
         endif()
 
+        if ("${{ runner.os }}" STREQUAL "macOS")
+          set(ADDITIONAL_BUILD_ARGS "--add-config=-DCMAKE_OSX_ARCHITECTURES=x86_64\;arm64")
+        endif()
+
         set(ENV{NINJA_STATUS} "[%f/%t %o/sec] ")
 
         set(build_plugin_py "scripts/build_plugin.py")
@@ -237,6 +241,7 @@ jobs:
             --qt-path "${{ steps.qt.outputs.qt_dir }}"
             --qtc-path "${{ steps.qt_creator.outputs.qtc_dir }}"
             --output-path "$ENV{GITHUB_WORKSPACE}"
+            ${ADDITIONAL_BUILD_ARGS}
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
