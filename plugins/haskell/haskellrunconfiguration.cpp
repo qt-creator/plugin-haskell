@@ -56,12 +56,12 @@ HaskellExecutableAspect::HaskellExecutableAspect()
 HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Utils::Id id)
     : RunConfiguration(target, id)
 {
-    addAspect<LocalEnvironmentAspect>(target);
+    auto envAspect = addAspect<LocalEnvironmentAspect>(target);
 
     addAspect<HaskellExecutableAspect>();
     addAspect<ArgumentsAspect>();
 
-    auto workingDirAspect = addAspect<WorkingDirectoryAspect>();
+    auto workingDirAspect = addAspect<WorkingDirectoryAspect>(envAspect);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
     workingDirAspect->setVisible(false);
 
