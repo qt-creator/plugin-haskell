@@ -59,7 +59,7 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Utils::Id id)
     auto envAspect = addAspect<LocalEnvironmentAspect>(target);
 
     addAspect<HaskellExecutableAspect>();
-    addAspect<ArgumentsAspect>();
+    addAspect<ArgumentsAspect>(macroExpander());
 
     auto workingDirAspect = addAspect<WorkingDirectoryAspect>(envAspect);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
@@ -83,7 +83,7 @@ Runnable HaskellRunConfiguration::runnable() const
                     buildConfiguration->buildDirectory().toString());
     }
     args << "exec" << aspect<HaskellExecutableAspect>()->value();
-    const QString arguments = aspect<ArgumentsAspect>()->arguments(macroExpander());
+    const QString arguments = aspect<ArgumentsAspect>()->arguments();
     if (!arguments.isEmpty())
         args << "--" << arguments;
 
