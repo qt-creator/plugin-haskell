@@ -61,7 +61,7 @@ HaskellRunConfiguration::HaskellRunConfiguration(Target *target, Utils::Id id)
     addAspect<HaskellExecutableAspect>();
     addAspect<ArgumentsAspect>(macroExpander());
 
-    auto workingDirAspect = addAspect<WorkingDirectoryAspect>(envAspect);
+    auto workingDirAspect = addAspect<WorkingDirectoryAspect>(macroExpander(), envAspect);
     workingDirAspect->setDefaultWorkingDirectory(target->project()->projectDirectory());
     workingDirAspect->setVisible(false);
 
