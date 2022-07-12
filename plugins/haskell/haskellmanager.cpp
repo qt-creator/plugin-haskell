@@ -111,11 +111,13 @@ void HaskellManager::openGhci(const FilePath &haskellFile)
     p->setTerminalMode(TerminalMode::On);
     p->setCommand({stackExecutable(), args});
     p->setWorkingDirectory(haskellFile.absolutePath());
-    connect(p, &QtcProcess::errorOccurred, p, [p] {
-        Core::MessageManager::writeDisrupting(tr("Failed to run GHCi: \"%1\".").arg(p->errorString()));
+    connect(p, &QtcProcess::done, p, [p] {
+        if (p->result() != ProcessResult::FinishedWithSuccess) {
+            Core::MessageManager::writeDisrupting(
+                tr("Failed to run GHCi: \"%1\".").arg(p->errorString()));
+        }
         p->deleteLater();
     });
-    connect(p, &QtcProcess::finished, p, &QObject::deleteLater);
     p->start();
 }
 
