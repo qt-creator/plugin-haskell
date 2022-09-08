@@ -122,7 +122,7 @@ HaskellBuildConfigurationWidget::HaskellBuildConfigurationWidget(HaskellBuildCon
                 buildDirectoryInput->setFilePath(m_buildConfiguration->buildDirectory());
             });
     connect(buildDirectoryInput,
-            &Utils::PathChooser::pathChanged,
+            &Utils::PathChooser::textChanged,
             m_buildConfiguration,
             [this, buildDirectoryInput](const QString &) {
                 m_buildConfiguration->setBuildDirectory(buildDirectoryInput->rawFilePath());
