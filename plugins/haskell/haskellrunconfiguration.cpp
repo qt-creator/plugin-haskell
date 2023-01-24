@@ -25,6 +25,7 @@
 
 #include "haskellrunconfiguration.h"
 
+#include "haskellconstants.h"
 #include "haskellmanager.h"
 #include "haskellproject.h"
 

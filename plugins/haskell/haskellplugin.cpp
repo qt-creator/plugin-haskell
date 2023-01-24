@@ -54,6 +54,7 @@ public:
     HaskellBuildConfigurationFactory buildConfigFactory;
     StackBuildStepFactory stackBuildStepFactory;
     HaskellRunConfigurationFactory runConfigFactory;
+    ProjectExplorer::SimpleTargetRunnerFactory runWorkerFactory{{Constants::C_HASKELL_RUNCONFIG_ID}};
 };
 
 HaskellPlugin::~HaskellPlugin()
